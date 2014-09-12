@@ -11,6 +11,8 @@ Matrix.prototype.set = function(x,y,z){
 };
 
 function Graph(n){
+    this.parent = new Array(n);
+    this.level = new Array(n);
     this.marked = new Array(n);
     for (var i=1; i<=n; ++i)
         this.marked[i-1] = 0;
@@ -30,7 +32,9 @@ Graph.prototype.bfs = function(n,next){
         this.marked[i] = 0;
     var stack = [];
     var index = 0;
-    this.marked[n-1] = 1
+    this.marked[n-1] = 1;
+    this.parent][n-1] = 0;
+    this.level[n-1] = 0;
     stack.push(n)
     while(index < stack.length){
         var node = stack[index];
@@ -46,6 +50,8 @@ Graph.prototype.bfs = function(n,next){
         for (var i = 0, l = neigs.length; i<l; ++i){
             var neig = neigs[i];
             if (!this.marked[neig-1]) {
+                this.parent[neig-1] = node;
+                this.level[neig-1] = this.level[node-1] + 1;
                 this.marked[neig-1] = 1;
                 stack.push(neig);
             };
