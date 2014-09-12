@@ -24,6 +24,27 @@ Graph.prototype.dfs = function(n){
         };
     };
 };
+Graph.prototype.bfs = function(n){
+    for (var i = this.marked.length - 1; i >= 0; i--)
+        this.marked[i] = 0;
+    var stack = [];
+    var index = 0;
+    this.marked[n-1] = 1
+    stack.push(n)
+    while(stack.length > 0){
+        var node = stack[index];
+        var neigs = this.neighbors(node);
+        ++index;
+        for (var i = neigs.length - 1; i >= 0; i--) {
+            var neig = neigs[i];
+            if (!this.marked[neig-1]) {
+                this.marked[neig-1] = 1;
+                stack.push(node);
+            };
+        };
+    }
+
+}
 
 function ArrayGraph(n){
     Graph.call(this,n);
@@ -131,6 +152,9 @@ if (typeof window !== "undefined"){
     var renderElement = render(mg); 
     document.body.appendChild(renderElement);
 };
+
+
+
 
 
 
