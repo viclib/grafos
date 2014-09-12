@@ -25,24 +25,33 @@ Graph.prototype.dfs = function(n){
         };
     };
 };
-Graph.prototype.bfs = function(n){
+Graph.prototype.bfs = function(n,next){
     for (var i = this.marked.length - 1; i >= 0; i--)
         this.marked[i] = 0;
     var stack = [];
     var index = 0;
     this.marked[n-1] = 1
     stack.push(n)
-    while(stack.length > 0){
-        console.log("Estou no "+node);
+    while(index < stack.length){
         var node = stack[index];
         var neigs = this.neighbors(node);
+        neigs.sort(function(a,b){return a-b});
+        console.log(
+            "Estou no "
+                +node
+                +" (indice "+index+"/"+stack.length+")"
+                +" \t -- a stack é: "+JSON.stringify(stack)
+                +" \t -- meus viz são: "+JSON.stringify(neigs));
         ++index;
-        for (var i = neigs.length - 1; i >= 0; i--) {
+        for (var i = 0, l = neigs.length; i<l; ++i){
             var neig = neigs[i];
             if (!this.marked[neig-1]) {
                 this.marked[neig-1] = 1;
-                stack.push(node);
+                stack.push(neig);
             };
+        };
+        if (next) {
+            
         };
     };
 };
@@ -104,7 +113,8 @@ mg.addEdge(4,5);
 mg.addEdge(5,6);
 mg.addEdge(5,10);
 mg.addEdge(9,10);
-mg.dfs(1);
+//mg.dfs(1);
+mg.bfs(1);
 
 
 function render(graph){
