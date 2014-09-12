@@ -18,6 +18,7 @@ function Graph(n){
 Graph.prototype.dfs = function(n){
     var neig = this.neighbors(n);
     this.marked[n-1] = 1;
+    console.log("I'm at "+n);
     for (var i=0, l=neig.length; i<l; ++i){
         if (!this.marked[neig[i]-1]){
             this.dfs(neig[i]);
