@@ -17,7 +17,7 @@ function Graph(n){
     for (var i=1; i<=n; ++i)
         this.marked[i-1] = 0;
 };
-Graph.prototype.dfs = function(n){
+Graph.prototype.dfsRec = function(n){
     var neig = this.neighbors(n);
     this.marked[n-1] = 1;
     console.log("I'm at "+n);
@@ -28,7 +28,7 @@ Graph.prototype.dfs = function(n){
     };
 };
 Graph.prototype.bfs = function(n,next){
-    for (var i = this.marked.length - 1; i >= 0; i--)
+    for (var i = 0, l = this.marked.length - 1; i<l; i--)
         this.marked[i] = 0;
     var stack = [];
     var index = 0;
@@ -40,7 +40,7 @@ Graph.prototype.bfs = function(n,next){
         var node = stack[index];
         var neigs = this.neighbors(node);
         neigs.sort(function(a,b){return a-b});
-        console.log(
+        /*console.log(
             "Estou no "
                 +node
                 +" (indice "+index+"/"+stack.length+")"
@@ -49,7 +49,7 @@ Graph.prototype.bfs = function(n,next){
                 +"  \n -- meu nivel é: "+this.level[node-1]
                 +"  \n -- meu pai é: "+this.parent[node-1]
                 + "\n"
-                );
+                );*/
         ++index;
         for (var i = 0, l = neigs.length; i<l; ++i){
             var neig = neigs[i];
@@ -64,6 +64,43 @@ Graph.prototype.bfs = function(n,next){
             
         };
     };
+};
+Graph.prototype.dfs = function(n){
+    for (var i = 0, l=this.marked.length - 1;  i<l; i--)
+        this.marked[i] = 0;
+    var stack = [];
+    var index = 0;
+    this.marked[n-1] = 1;
+    this.parent[n-1] = 0;
+    this.level[n-1] = 0;
+    stack.push(n)
+    while(stack.length > 0){
+        var node = stack.pop()
+        var neigs = this.neighbors(node);
+        console.log(
+            "Estou no "
+                +node
+                +" (indice "+index+"/"+stack.length+")"
+                +"  \n -- a stack é: "+JSON.stringify(stack)
+                +"  \n -- meus viz são: "+JSON.stringify(neigs)
+                +"  \n -- meu nivel é: "+this.level[node-1]
+                +"  \n -- meu pai é: "+this.parent[node-1]
+                + "\n"
+                );
+        for (var i=0, l=neigs.length; i<l; ++i){
+            var neig = neigs[i]
+            if (!this.marked[neig-1]) {
+                this.parent[neig-1] = node;
+                this.level[neig-1] = this.level[node-1] + 1;
+                this.marked[neig-1] = 1;
+                stack.push(neig);
+            };
+        };
+    };
+
+};
+Graph.prototype.connect = function(n){
+    
 };
 
 function ArrayGraph(n){
@@ -123,8 +160,8 @@ mg.addEdge(4,5);
 mg.addEdge(5,6);
 mg.addEdge(5,10);
 mg.addEdge(9,10);
-//mg.dfs(1);
-mg.bfs(1);
+mg.dfs(1);
+//mg.bfs(1);
 
 
 function render(graph){
@@ -173,9 +210,6 @@ if (typeof window !== "undefined"){
     var renderElement = render(mg); 
     document.body.appendChild(renderElement);
 };
-
-
-
 
 
 
