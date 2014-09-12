@@ -33,7 +33,7 @@ Graph.prototype.bfs = function(n,next){
     var stack = [];
     var index = 0;
     this.marked[n-1] = 1;
-    this.parent][n-1] = 0;
+    this.parent[n-1] = 0;
     this.level[n-1] = 0;
     stack.push(n)
     while(index < stack.length){
@@ -44,8 +44,12 @@ Graph.prototype.bfs = function(n,next){
             "Estou no "
                 +node
                 +" (indice "+index+"/"+stack.length+")"
-                +" \t -- a stack é: "+JSON.stringify(stack)
-                +" \t -- meus viz são: "+JSON.stringify(neigs));
+                +"  \n -- a stack é: "+JSON.stringify(stack)
+                +"  \n -- meus viz são: "+JSON.stringify(neigs)
+                +"  \n -- meu nivel é: "+this.level[node-1]
+                +"  \n -- meu pai é: "+this.parent[node-1]
+                + "\n"
+                );
         ++index;
         for (var i = 0, l = neigs.length; i<l; ++i){
             var neig = neigs[i];
