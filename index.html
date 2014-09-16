@@ -1,7 +1,69 @@
 <html>
 <head>
+<script src="patvicgraphlib.js"></script>
 </head>
 <body>
-<script src="grafos.js"></script>
+<script>
+function render(params){
+    var graph = params.graph;
+    var canvas = params.canvas;
+    var ctx = params.ctx;
+    var x = window.innerWidth * 0.5;
+    var y = window.innerHeight * 0.5;
+    //canvas.style.border = "2px solid black";
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    var rad = 150;
+    ctx.fillStyle = "#FFFFFF";
+    ctx.strokeStyle = "#000000";
+    ctx.clearRect(0,0,canvas.widht,canvas.height);
+    function pos(node){
+        return {
+            x:x + Math.cos(Math.PI*2/graph.size*node) * rad, 
+            y:y + Math.sin(Math.PI*2/graph.size*node) * rad}};
+    for (var i=1,l=graph.size; i<=l; ++i){
+        graph.neighbors(i).map(function(n){
+            ctx.beginPath();
+            ctx.moveTo(pos(i).x,pos(i).y);
+            ctx.lineTo(pos(n).x,pos(n).y);
+            //console.log(pos(i).x, pos(i).y, pos(n).x, pos(n).y);
+            ctx.stroke();
+        });
+    };
+    for (var i=1,l=graph.size; i<=l; ++i){
+        ctx.fillStyle = graph.marked[i-1] ? "#AAAAAA" : "#FFFFFF";
+        ctx.fillStyle = "#FFFFFF";
+        ctx.beginPath();
+        ctx.arc(pos(i).x, pos(i).y, 26, 0, 2*Math.PI);
+        ctx.fill();
+        ctx.stroke();
+    };
+    ctx.fillStyle = "#000000";
+    for (var i=1,l=graph.size; i<=l; ++i){
+        ctx.font = "20px Georgia";
+        ctx.fillText(i, pos(i).x - 4, pos(i).y + 4);
+    };
+};
+var g = new ArrayGraph(10);
+g.addEdge(1,2);
+g.addEdge(2,3);
+g.addEdge(3,4);
+g.addEdge(1,5);
+g.addEdge(1,8);
+g.addEdge(8,7);
+g.addEdge(8,6);
+g.addEdge(4,5);
+g.addEdge(5,6);
+g.addEdge(5,10);
+g.addEdge(9,10);
+g.bfs(1,true);
+var canvas = document.createElement("canvas");
+var canvasCtx = canvas.getContext("2d");
+document.body.appendChild(canvas);
+render({graph:g, ctx:canvasCtx, canvas:canvas});
+setTimeout(function(){
+    render({graph:g, canvas:canvas, ctx:canvasCtx}); 
+},1000);
+</script>
 </body>
 </html>
