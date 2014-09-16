@@ -1,10 +1,5 @@
 var nodejs = typeof this.window === "undefined";
-var browser = !nodejs;
-var marks = {};
-var mark = function(name){ marks[name] = Date.now(); };
-var stop = function(name){ console.log(">> "+name+" took "+((Date.now()-marks[name])/1000)+"s"); };
-var fs = require("fs");
-
+var benchmark = function(f,t){ return t=Date.now(), f(), (Date.now()-t)/1000; };
 
 function Matrix(w,h){
     this.w = w;
@@ -35,75 +30,23 @@ Graph.prototype.dfsRec = function(n){
         };
     };
 };
-
-Graph.prototype.bfs = function(n,debug){
-    var self = this;
-    for (var i = self.marked.length - 1; i >= 0; i--)
-        self.marked[i] = 0;
-    var stack = [];
-    var index = 0;
-    self.parent[n-1] = 0;
-    self.level[n-1] = 0;
-    self.marked[n-1] = 1;
-    stack.push(n);
-    for (var index = 0; index < stack.length; ++index){
-        var node = stack[index];
-        var neigs = self.neighbors(node);
-        console.log("..",neigs);
-        if (debug) console.log(
-            "Estou no "+node+" (indice "+index+"/"+(stack.length-1)+")"
-                + "  \n -- a stack é: "    + JSON.stringify(stack)
-                + "  \n -- meus viz são: " + JSON.stringify(neigs)
-                + "  \n -- meu nivel é: "  + self.level[node-1]
-                + "  \n -- meu pai é: "    + self.parent[node-1]
-                + "\n");
-        neigs.sort(function(a,b){return a-b});
-        /*console.log(
-            "Estou no "
-                +node
-                +" (indice "+index+"/"+stack.length+")"
-                +"  \n -- a stack é: "+JSON.stringify(stack)
-                +"  \n -- meus viz são: "+JSON.stringify(neigs)
-                +"  \n -- meu nivel é: "+this.level[node-1]
-                +"  \n -- meu pai é: "+this.parent[node-1]
-                + "\n"
-                );*/
-        ++index;
-        for (var i = 0, l = neigs.length; i<l; ++i){
-            var neig = neigs[i];
-            if (!self.marked[neig-1]) {
-                self.parent[neig-1] = node;
-                self.level[neig-1] = self.level[node-1] + 1;
-                self.marked[neig-1] = 1;
-                stack.push(neig);
-            };
-        };
-    };
-};
-Graph.prototype.dfs = function(n){
-    for (var i = 0, l=this.marked.length - 1;  i<l; i--)
+Graph.prototype.clear = function(){
+    for (var i=0, l=this.marked.length; i<l; ++i)
         this.marked[i] = 0;
-    var stack = [];
-    var index = 0;
-    this.marked[n-1] = 1;
+};
+Graph.prototype.bfs = function(n,debug){
+    this.clear();
+    var stack = [n];
     this.parent[n-1] = 0;
     this.level[n-1] = 0;
-    stack.push(n)
-    while(stack.length > 0){
-        var node = stack.pop()
+    this.marked[n-1] = 1;
+    if (debug) console.log("NOD\tLVL\tPAR");
+    for (var index = 0; index < stack.length; ++index){
+        var node = stack[index];
         var neigs = this.neighbors(node);
-        console.log(
-            "Estou no "
-                +node
-                +" (indice "+index+"/"+stack.length+")"
-                +"  \n -- a stack é: "+JSON.stringify(stack)
-                +"  \n -- meus viz são: "+JSON.stringify(neigs)
-                +"  \n -- meu nivel é: "+this.level[node-1]
-                +"  \n -- meu pai é: "+this.parent[node-1]
-                + "\n"
-                );
-        for (var i=0, l=neigs.length; i<l; ++i){
-            var neig = neigs[i]
+        if (debug) console.log(node+"\t"+this.level[node-1]+"\t"+this.parent[node-1])
+        for (var i = 0, l = neigs.length; i<l; ++i){
+            var neig = neigs[i];
             if (!this.marked[neig-1]) {
                 this.parent[neig-1] = node;
                 this.level[neig-1] = this.level[node-1] + 1;
@@ -112,9 +55,30 @@ Graph.prototype.dfs = function(n){
             };
         };
     };
-
 };
-
+Graph.prototype.dfs = function(n,debug){
+    this.clear();
+    var stack = [n];
+    this.parent[n-1] = 0;
+    this.level[n-1] = 0;
+    if (debug) console.log("NOD\tLVL\tPAR");
+    while(stack.length > 0){
+        var node = stack.pop()
+        if (!this.marked[node-1]){
+            if (debug) console.log(node+"\t"+this.level[node-1]+"\t"+this.parent[node-1]);
+            var neigs = this.neighbors(node);
+            this.marked[node-1] = 1;
+            for (var i=neigs.length-1; i>=0; --i){
+                var neig = neigs[i];
+                if (!this.marked[neig-1]) {
+                    this.parent[neig-1] = node;
+                    this.level[neig-1] = this.level[node-1] + 1;
+                    stack.push(neig);
+                };
+            };
+        };
+    };
+};
 
 function ArrayGraph(n){
     Graph.call(this,n);
@@ -137,7 +101,6 @@ ArrayGraph.prototype.hasEdge = function(x,y){
 ArrayGraph.prototype.neighbors = function(n){
     return this.array[n-1];
 };
-
 
 function MatrixGraph(n){
     Graph.call(this,n);
@@ -181,88 +144,80 @@ var buildGraphFromFile = function(file,Graph,callback){
             file = file.slice(newLineIndex+1);
         };
     });
-    mark("rf");
     fileStream.on("end",function(){ 
         callback(graph);
     });
 };
 
-var file = "./data/as_graph.txt";
-var file = "./data/subdblp.txt";
-g = buildGraphFromFile(file,MatrixGraph,function(graph){
-    console.log("Loaded!");
-    //console.log(JSON.stringify(graph));
-});
-
-
-function render(params){
-    var graph = params.graph;
-    var canvas = params.canvas;
-    var ctx = params.ctx;
-    var x = window.innerWidth * 0.5;
-    var y = window.innerHeight * 0.5;
-    //canvas.style.border = "2px solid black";
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    var rad = 150;
-    ctx.fillStyle = "#FFFFFF";
-    ctx.strokeStyle = "#000000";
-    ctx.clearRect(0,0,canvas.widht,canvas.height);
-    function pos(node){
-        return {
-            x:x + Math.cos(Math.PI*2/graph.size*node) * rad, 
-            y:y + Math.sin(Math.PI*2/graph.size*node) * rad}};
-    for (var i=1,l=graph.size; i<=l; ++i){
-        graph.neighbors(i).map(function(n){
-            ctx.beginPath();
-            ctx.moveTo(pos(i).x,pos(i).y);
-            ctx.lineTo(pos(n).x,pos(n).y);
-            //console.log(pos(i).x, pos(i).y, pos(n).x, pos(n).y);
-            ctx.stroke();
-        });
-    };
-    for (var i=1,l=graph.size; i<=l; ++i){
-        ctx.fillStyle = graph.marked[i-1] ? "#AAAAAA" : "#FFFFFF";
+if (nodejs){
+    var fs = require("fs");
+    var file = "./data/as_graph.txt";
+    g = buildGraphFromFile(file,MatrixGraph,function(graph){
+        console.log("BFS took: "+benchmark(function(){graph.bfs(1)})+"s");
+        console.log("DFS took: "+benchmark(function(){graph.bfs(1)})+"s");
+    });
+} else {
+    function render(params){
+        var graph = params.graph;
+        var canvas = params.canvas;
+        var ctx = params.ctx;
+        var x = window.innerWidth * 0.5;
+        var y = window.innerHeight * 0.5;
+        //canvas.style.border = "2px solid black";
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        var rad = 150;
         ctx.fillStyle = "#FFFFFF";
-        ctx.beginPath();
-        ctx.arc(pos(i).x, pos(i).y, 26, 0, 2*Math.PI);
-        ctx.fill();
-        ctx.stroke();
+        ctx.strokeStyle = "#000000";
+        ctx.clearRect(0,0,canvas.widht,canvas.height);
+        function pos(node){
+            return {
+                x:x + Math.cos(Math.PI*2/graph.size*node) * rad, 
+                y:y + Math.sin(Math.PI*2/graph.size*node) * rad}};
+        for (var i=1,l=graph.size; i<=l; ++i){
+            graph.neighbors(i).map(function(n){
+                ctx.beginPath();
+                ctx.moveTo(pos(i).x,pos(i).y);
+                ctx.lineTo(pos(n).x,pos(n).y);
+                //console.log(pos(i).x, pos(i).y, pos(n).x, pos(n).y);
+                ctx.stroke();
+            });
+        };
+        for (var i=1,l=graph.size; i<=l; ++i){
+            ctx.fillStyle = graph.marked[i-1] ? "#AAAAAA" : "#FFFFFF";
+            ctx.fillStyle = "#FFFFFF";
+            ctx.beginPath();
+            ctx.arc(pos(i).x, pos(i).y, 26, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.stroke();
+        };
+        ctx.fillStyle = "#000000";
+        for (var i=1,l=graph.size; i<=l; ++i){
+            ctx.font = "20px Georgia";
+            ctx.fillText(i, pos(i).x - 4, pos(i).y + 4);
+        };
     };
-    ctx.fillStyle = "#000000";
-    for (var i=1,l=graph.size; i<=l; ++i){
-        ctx.font = "20px Georgia";
-        ctx.fillText(i, pos(i).x - 4, pos(i).y + 4);
-    };
+    var g = new ArrayGraph(10);
+    g.addEdge(1,2);
+    g.addEdge(2,3);
+    g.addEdge(3,4);
+    g.addEdge(1,5);
+    g.addEdge(1,8);
+    g.addEdge(8,7);
+    g.addEdge(8,6);
+    g.addEdge(4,5);
+    g.addEdge(5,6);
+    g.addEdge(5,10);
+    g.addEdge(9,10);
+    g.bfs(1,true);
+    var canvas = document.createElement("canvas");
+    var canvasCtx = canvas.getContext("2d");
+    document.body.appendChild(canvas);
+    render({graph:g, ctx:canvasCtx, canvas:canvas});
+    setTimeout(function(){
+        render({graph:g, canvas:canvas, ctx:canvasCtx}); 
+    },1000);
 };
-
-
-
-
-
-
-//var g = new ArrayGraph(10);
-//g.addEdge(1,2);
-//g.addEdge(2,3);
-//g.addEdge(3,4);
-//g.addEdge(1,5);
-//g.addEdge(1,8);
-//g.addEdge(8,7);
-//g.addEdge(8,6);
-//g.addEdge(4,5);
-//g.addEdge(5,6);
-//g.addEdge(5,10);
-//g.addEdge(9,10);
-//g.bfs(1,true);
-//if (browser){
-    //var canvas = document.createElement("canvas");
-    //var canvasCtx = canvas.getContext("2d");
-    //document.body.appendChild(canvas);
-    //render({graph:g, ctx:canvasCtx, canvas:canvas});
-    //setTimeout(function(){
-        //render({graph:g, canvas:canvas, ctx:canvasCtx}); 
-    //},1000);
-//}; 
 
 
 
@@ -275,3 +230,13 @@ function render(params){
 //minhaArray.addEdge(4,2);
 //console.log((minhaArray));
 //console.log((minhaArray.value));
+
+//if (debug) console.log(
+    //"Estou no "
+        //+node
+        //+"  \n -- a stack é: "+JSON.stringify(stack)
+        //+"  \n -- meus viz são: "+JSON.stringify(neigs)
+        //+"  \n -- meu nivel é: "+this.level[node-1]
+        //+"  \n -- meu pai é: "+this.parent[node-1]
+        //+ "\n");
+
