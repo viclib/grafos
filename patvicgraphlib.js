@@ -23,11 +23,9 @@ function Graph(n){
 Graph.prototype.dfsRec = function(n){
     var neig = this.neighbors(n);
     this.marked[n-1] = 1;
-    for (var i=0, l=neig.length; i<l; ++i){
-        if (!this.marked[neig[i]-1]){
+    for (var i=0, l=neig.length; i<l; ++i)
+        if (!this.marked[neig[i]-1])
             this.dfs(neig[i]);
-        };
-    };
 };
 Graph.prototype.clear = function(){
     for (var i=0, l=this.marked.length; i<l; ++i)
@@ -147,8 +145,6 @@ var buildGraphFromFile = function(file,Graph,callback){
         callback(graph);
     });
 };
-
-var fs        = nodejs && require("fs");
 
 if (nodejs) module.exports = {
     fromFile    : buildGraphFromFile,
