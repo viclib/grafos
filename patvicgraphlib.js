@@ -2,8 +2,8 @@ var nodejs = typeof window === "undefined";
 var fs     = nodejs && require("fs");
 
 function Matrix(w,h){
-    this.w = w;
-    this.h = h;
+    this.w      = w;
+    this.h      = h;
     this.buffer = new Uint8Array(w*h);
 };
 Matrix.prototype.get = function(x,y){
@@ -15,9 +15,9 @@ Matrix.prototype.set = function(x,y,z){
 
 function Graph(n){
     this.parent = new Array(n);
-    this.level = new Array(n);
+    this.level  = new Array(n);
     this.marked = new Array(n);
-    this.
+    //this.
     this.prevUnmarked = new Array(n);
     this.nextUnmarked = new Array(n);
     this.firstUnmarked = 1;
@@ -27,11 +27,9 @@ function Graph(n){
 Graph.prototype.dfsRec = function(n){
     var neig = this.neighbors(n);
     this.marked[n-1] = 1;
-    for (var i=0, l=neig.length; i<l; ++i){
-        if (!this.marked[neig[i]-1]){
+    for (var i=0, l=neig.length; i<l; ++i)
+        if (!this.marked[neig[i]-1])
             this.dfs(neig[i]);
-        };
-    };
 };
 Graph.prototype.clear = function(){
     for (var i=0, l=this.marked.length; i<l; ++i){
@@ -41,12 +39,11 @@ Graph.prototype.clear = function(){
         this.firstUnmarked = 1;
     };
 };
-var kkk = 0;
 Graph.prototype.bfs = function(n,conexo,debug){
 	if (!conexo) this.clear();
     var stack = [n];
     this.parent[n-1] = 0;
-    this.level[n-1] = 0;
+    this.level[n-1]  = 0;
     this.marked[n-1] = 1;
 
 	var self = this;
@@ -67,14 +64,14 @@ Graph.prototype.bfs = function(n,conexo,debug){
 
     if (debug) console.log("NOD\tLVL\tPAR");
     for (var index = 0; index < stack.length; ++index){
-        var node = stack[index];
+        var node  = stack[index];
         var neigs = this.neighbors(node);
         if (debug) console.log(node+"\t"+this.level[node-1]+"\t"+this.parent[node-1])
         for (var i = 0, l = neigs.length; i<l; ++i){
             var neig = neigs[i];
             if (!this.marked[neig-1]) {
                 this.parent[neig-1] = node;
-                this.level[neig-1] = this.level[node-1] + 1;
+                this.level[neig-1]  = this.level[node-1] + 1;
                 this.marked[neig-1] = 1;
 				feio(neig);
                 stack.push(neig);
@@ -84,9 +81,9 @@ Graph.prototype.bfs = function(n,conexo,debug){
 };
 Graph.prototype.dfs = function(n,debug){
     this.clear();
-    var stack = [n];
+    var stack        = [n];
     this.parent[n-1] = 0;
-    this.level[n-1] = 0;
+    this.level[n-1]  = 0;
     if (debug) console.log("NOD\tLVL\tPAR");
     while(stack.length > 0){
         var node = stack.pop()
@@ -119,7 +116,7 @@ Graph.prototype.conexo =function(){
 
 function ArrayGraph(n){
     Graph.call(this,n);
-    this.size = n;
+    this.size  = n;
     this.array = new Array(n);
     for (var i=0; i<n; ++i)
         this.array[i] = [];
@@ -141,7 +138,7 @@ ArrayGraph.prototype.neighbors = function(n){
 
 function MatrixGraph(n){
     Graph.call(this,n);
-    this.size = n;
+    this.size   = n;
     this.matrix = new Matrix(n,n);
 };
 MatrixGraph.prototype = new Graph();
@@ -161,7 +158,7 @@ MatrixGraph.prototype.neighbors = function(n){
     return neighbors;
 };
 
-var buildGraphFromFile = function(file,Graph,callback){
+var loadGraphFromFile = function(file,Graph,callback){
     var graph;
     var fileStream = fs.createReadStream(file,{encoding:"utf8"});
     var file = "";
@@ -169,10 +166,9 @@ var buildGraphFromFile = function(file,Graph,callback){
         var newLineIndex;
         file = file + chunk;
         while ((newLineIndex = file.indexOf("\n")) !== -1){
-            if (!graph){
+            if (!graph)
                 graph = new Graph(Number(file.slice(0,newLineIndex)));
-                console.log("Created graph with size = "+graph.size);
-            } else {
+            else {
                 var spaceIndex = file.indexOf(" ");
                 graph.addEdge(
                     Number(file.slice(0,spaceIndex)),
@@ -186,10 +182,8 @@ var buildGraphFromFile = function(file,Graph,callback){
     });
 };
 
-var fs        = nodejs && require("fs");
-
 if (nodejs) module.exports = {
-    fromFile    : buildGraphFromFile,
+    fromFile    : loadGraphFromFile,
     ArrayGraph  : ArrayGraph,
     MatrixGraph : MatrixGraph};
 
