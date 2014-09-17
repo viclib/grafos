@@ -101,7 +101,7 @@ ArrayGraph.prototype.neighbors = function(n){
 
 function MatrixGraph(n){
     Graph.call(this,n);
-    this.size = n;
+    this.size   = n;
     this.matrix = new Matrix(n,n);
 };
 MatrixGraph.prototype = new Graph();
