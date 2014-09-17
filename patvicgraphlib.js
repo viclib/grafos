@@ -17,6 +17,10 @@ function Graph(n){
     this.parent = new Array(n);
     this.level = new Array(n);
     this.marked = new Array(n);
+    this.
+    this.prevUnmarked = new Array(n);
+    this.nextUnmarked = new Array(n);
+    this.firstUnmarked = 1;
     for (var i=1; i<=n; ++i)
         this.marked[i-1] = 0;
 };
@@ -30,15 +34,37 @@ Graph.prototype.dfsRec = function(n){
     };
 };
 Graph.prototype.clear = function(){
-    for (var i=0, l=this.marked.length; i<l; ++i)
+    for (var i=0, l=this.marked.length; i<l; ++i){
         this.marked[i] = 0;
+        this.prevUnmarked[i] = i;
+        this.nextUnmarked[i] = i+2;
+        this.firstUnmarked = 1;
+    };
 };
-Graph.prototype.bfs = function(n,debug){
-    this.clear();
+var kkk = 0;
+Graph.prototype.bfs = function(n,conexo,debug){
+	if (!conexo) this.clear();
     var stack = [n];
     this.parent[n-1] = 0;
     this.level[n-1] = 0;
     this.marked[n-1] = 1;
+
+	var self = this;
+	function feio(n){
+		if (self.prevUnmarked[n-1] === 0)
+			self.firstUnmarked = self.nextUnmarked[n-1];
+		else
+			self.nextUnmarked[self.prevUnmarked[n-1]-1] = self.nextUnmarked[n-1];
+		if (self.nextUnmarked[n-1] !== self.size+1)
+			self.prevUnmarked[self.nextUnmarked[n-1]-1] = self.prevUnmarked[n-1];
+		//console.log("estou dentro de uma bfs no node ",n);
+		//console.log("-> marcado?",self.marked[n-1]);
+		//console.log("-> firstUnmarked = ",self.firstUnmarked);
+	};
+	feio(n);
+
+	// bag feio
+
     if (debug) console.log("NOD\tLVL\tPAR");
     for (var index = 0; index < stack.length; ++index){
         var node = stack[index];
@@ -50,6 +76,7 @@ Graph.prototype.bfs = function(n,debug){
                 this.parent[neig-1] = node;
                 this.level[neig-1] = this.level[node-1] + 1;
                 this.marked[neig-1] = 1;
+				feio(neig);
                 stack.push(neig);
             };
         };
@@ -78,6 +105,17 @@ Graph.prototype.dfs = function(n,debug){
         };
     };
 };
+Graph.prototype.conexo =function(){
+	this.clear();
+	var i = 0;
+    while (this.firstUnmarked !== this.size+1){
+		//console.log("-> estou rodando um bfs a partir do node ",this.firstUnmarked);
+        this.bfs(this.firstUnmarked,true);
+		++i;
+		//console.log("-> BFS RODADA ... prox: ",this.firstUnmarked,this.size);
+    }
+	console.log("Rodei: "+i+" bfs.");
+}
 
 function ArrayGraph(n){
     Graph.call(this,n);
