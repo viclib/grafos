@@ -2,8 +2,8 @@ var nodejs = typeof window === "undefined";
 var fs     = nodejs && require("fs");
 
 function Matrix(w,h){
-    this.w = w;
-    this.h = h;
+    this.w      = w;
+    this.h      = h;
     this.buffer = new Uint8Array(w*h);
 };
 Matrix.prototype.get = function(x,y){
@@ -15,7 +15,7 @@ Matrix.prototype.set = function(x,y,z){
 
 function Graph(n){
     this.parent = new Array(n);
-    this.level = new Array(n);
+    this.level  = new Array(n);
     this.marked = new Array(n);
     for (var i=1; i<=n; ++i)
         this.marked[i-1] = 0;
@@ -33,20 +33,20 @@ Graph.prototype.clear = function(){
 };
 Graph.prototype.bfs = function(n,debug){
     this.clear();
-    var stack = [n];
+    var stack        = [n];
     this.parent[n-1] = 0;
-    this.level[n-1] = 0;
+    this.level[n-1]  = 0;
     this.marked[n-1] = 1;
     if (debug) console.log("NOD\tLVL\tPAR");
     for (var index = 0; index < stack.length; ++index){
-        var node = stack[index];
+        var node  = stack[index];
         var neigs = this.neighbors(node);
         if (debug) console.log(node+"\t"+this.level[node-1]+"\t"+this.parent[node-1])
         for (var i = 0, l = neigs.length; i<l; ++i){
             var neig = neigs[i];
             if (!this.marked[neig-1]) {
                 this.parent[neig-1] = node;
-                this.level[neig-1] = this.level[node-1] + 1;
+                this.level[neig-1]  = this.level[node-1] + 1;
                 this.marked[neig-1] = 1;
                 stack.push(neig);
             };
@@ -55,9 +55,9 @@ Graph.prototype.bfs = function(n,debug){
 };
 Graph.prototype.dfs = function(n,debug){
     this.clear();
-    var stack = [n];
+    var stack        = [n];
     this.parent[n-1] = 0;
-    this.level[n-1] = 0;
+    this.level[n-1]  = 0;
     if (debug) console.log("NOD\tLVL\tPAR");
     while(stack.length > 0){
         var node = stack.pop()
@@ -79,7 +79,7 @@ Graph.prototype.dfs = function(n,debug){
 
 function ArrayGraph(n){
     Graph.call(this,n);
-    this.size = n;
+    this.size  = n;
     this.array = new Array(n);
     for (var i=0; i<n; ++i)
         this.array[i] = [];
@@ -121,7 +121,7 @@ MatrixGraph.prototype.neighbors = function(n){
     return neighbors;
 };
 
-var buildGraphFromFile = function(file,Graph,callback){
+var loadGraphFromFile = function(file,Graph,callback){
     var graph;
     var fileStream = fs.createReadStream(file,{encoding:"utf8"});
     var file = "";
@@ -129,10 +129,9 @@ var buildGraphFromFile = function(file,Graph,callback){
         var newLineIndex;
         file = file + chunk;
         while ((newLineIndex = file.indexOf("\n")) !== -1){
-            if (!graph){
+            if (!graph)
                 graph = new Graph(Number(file.slice(0,newLineIndex)));
-                console.log("Created graph with size = "+graph.size);
-            } else {
+            else {
                 var spaceIndex = file.indexOf(" ");
                 graph.addEdge(
                     Number(file.slice(0,spaceIndex)),
