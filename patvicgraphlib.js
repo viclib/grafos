@@ -4,13 +4,15 @@ if (typeof require !== "undefined") var fs = require("fs");
 function Matrix(w,h){
     this.w      = w;
     this.h      = h;
-    this.buffer = new Uint8Array(w*h);
+    this.buffer = new Uint8Array((w*h + (8 - w*h % 8))/8);
 };
 Matrix.prototype.get = function(x,y){
-    return this.buffer[this.w * y + x];
+    var bitPos = this.w * y + x;
+    return (this.buffer[~~(bitPos>>3)] >> (7 - (bitPos & 7))) & 1;
 };
-Matrix.prototype.set = function(x,y,z){
-    return this.buffer[this.w * y + x] = z;
+Matrix.prototype.set = function(x,y){
+    var bitPos = this.w * y + x;
+    return this.buffer[~~(bitPos/8)] = this.buffer[~~(bitPos/8)] | (1 << (7 - (bitPos & 7)));
 };
 
 function Graph(n){
@@ -174,8 +176,8 @@ function MatrixGraph(n){
 };
 MatrixGraph.prototype = new Graph(0);
 MatrixGraph.prototype.addEdge = function(x,y){
-    this.matrix.set(x-1,y-1,1);
-    this.matrix.set(y-1,x-1,1);
+    this.matrix.set(x-1,y-1);
+    this.matrix.set(y-1,x-1);
 };
 MatrixGraph.prototype.hasEdge = function(x,y){
     return this.matrix.get(x-1,y-1);
