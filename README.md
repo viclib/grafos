@@ -27,6 +27,6 @@ Aka: trabalho de grafos com a **Pat** sz
 
 ola
 
-| peixe | espada | leão
-| atmosfera | ninja | camarão |
-| cadeira | tigre | onça |
+peixe | espada | leão
+atmosfera | ninja | camarão |
+cadeira | tigre | onça |
