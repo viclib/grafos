@@ -1,6 +1,6 @@
-var lib = require("./patvicgraphlib.js");
-var io  = require('socket.io').listen(8096);
-var fs  = require("fs");
+var lib  = require("./patvicgraphlib.js");
+var io   = require('socket.io').listen(8097);
+var fs   = require("fs");
 var exec = require("child_process").exec;
 var util = require("util");
 

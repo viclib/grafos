@@ -1,23 +1,20 @@
 //http://www.html5rocks.com/en/tutorials/workers/basics/#toc-transferrables
 importScripts("patvicgraphlib.js");
-importScripts("http://localhost:8096/socket.io/socket.io.js");
-var socket = io('http://localhost:8096');
+importScripts("http://localhost:8097/socket.io/socket.io.js");
+var socket = io('http://localhost:8097');
 var graph;
 
 console.log("Carregando grafo...");
 socket.on("graph",function(g){
-    var array = [];
-    var sizes = new Uint32Array(g.sizes);
+    var array  = [];
+    var sizes  = new Uint32Array(g.sizes);
     var arrays = new Uint32Array(g.arrays);
     for (var j=0, k=0, l=sizes.length; j<l; ++j){
         array[j] = [];
         for (var i=0,m=sizes[j]; i<m; ++i, ++k)
             array[j][i] = arrays[k]; 
     };
-    //console.log(array);
     graph = new ArrayGraph(sizes.length,{array:array});
-
-    //console.log("Grafo carregado.",graph.size,JSON.stringify(graph.array));
 });
 var lastAlloc = Date.now();
 socket.on("workload",function(workload){
@@ -28,9 +25,7 @@ socket.on("workload",function(workload){
     var results = [];
     for (var i=0; i<size; ++i){
         var node = workload[i];
-        graph.maxLevel = 0;
-        graph.bfsFast(node);
-        results.push(graph.maxLevel);
+        results.push(graph.diameter(node));
     };
     var time = (Date.now() - start)/1000;
     var bfss = size/time;
