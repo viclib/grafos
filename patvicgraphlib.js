@@ -16,16 +16,15 @@ Matrix.prototype.set = function(x,y){
 };
 
 function Graph(n){
-    this.parent = new Uint32Array(n);
-    this.level  = new Uint8Array(n);
-    this.marked = new Uint8Array(n);
-    this.prevUnmarked = new Uint32Array(n);
-    this.nextUnmarked = new Uint32Array(n);
+    this.parent        = new Uint32Array(n);
+    this.level         = new Uint8Array(n);
+    this.marked        = new Uint8Array(n);
+    this.stack         = new Uint32Array(1500000); // porque sim @.@ me processa
+    this.prevUnmarked  = new Uint32Array(n);
+    this.nextUnmarked  = new Uint32Array(n);
     this.firstUnmarked = 1;
     for (var i=1; i<=n; ++i)
         this.marked[i-1] = 0;
-    this.stack = new Uint32Array(1300000);
-    this.maxLevel = 0;
 };
 Graph.prototype.dfsRec = function(n){
     var neig = this.neighbors(n);
@@ -42,9 +41,10 @@ Graph.prototype.clear = function(){
         this.firstUnmarked = 1;
     };
 };
-Graph.prototype.bfsFast = function(n){
+Graph.prototype.diameter = function(n){
     for (var i=0, l=this.marked.length; i<l; ++i)
         this.marked[i] = 0;
+    var maxLevel = 0;
     this.stack[0]    = n;
     this.level[n-1]  = 0;
     this.marked[n-1] = 0;
@@ -58,11 +58,12 @@ Graph.prototype.bfsFast = function(n){
                 this.marked[neig-1] = 1;
                 this.level[neig-1]  = level;
                 this.stack[count++] = neig;
-                if (this.maxLevel < level)
-                    this.maxLevel = level;
+                if (maxLevel < level)
+                    maxLevel = level;
             };
         };
     };
+    return maxLevel;
 };
 Graph.prototype.bfs = function(n,conexo,debug){
 	if (!conexo) this.clear();
@@ -150,8 +151,6 @@ function ArrayGraph(n,params){
     //this.arestas = {};
 };
 ArrayGraph.prototype = new Graph(0);
-//ArrayGraph.prototype.networkData = function(){
-//};
 ArrayGraph.prototype.addEdge = function(x,y){
     //if (!this.arestas[[x,y]]){
         //this.arestas[[x,y]] = true;
