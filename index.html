@@ -1,9 +1,12 @@
 <html>
 <head>
+<script>document.write('<script src="//'+ location.hostname + ':8096/socket.io/socket.io.js">\x3C/script>')</script>
 <script src="patvicgraphlib.js"></script>
 </head>
 <body>
+<script src="client.js"></script>
 <script>
+/*
 function render(params){
     var graph = params.graph;
     var canvas = params.canvas;
@@ -64,6 +67,7 @@ render({graph:g, ctx:canvasCtx, canvas:canvas});
 setTimeout(function(){
     render({graph:g, canvas:canvas, ctx:canvasCtx}); 
 },1000);
+*/
 </script>
 </body>
 </html>

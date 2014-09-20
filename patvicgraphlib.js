@@ -1,5 +1,5 @@
 var nodejs = typeof window === "undefined";
-var fs     = nodejs && require("fs");
+if (typeof require !== "undefined") var fs = require("fs");
 
 function Matrix(w,h){
     this.w      = w;
@@ -14,15 +14,16 @@ Matrix.prototype.set = function(x,y,z){
 };
 
 function Graph(n){
-    this.parent = new Array(n);
-    this.level  = new Array(n);
-    this.marked = new Array(n);
-    //this.
-    this.prevUnmarked = new Array(n);
-    this.nextUnmarked = new Array(n);
+    this.parent = new Uint32Array(n);
+    this.level  = new Uint8Array(n);
+    this.marked = new Uint8Array(n);
+    this.prevUnmarked = new Uint32Array(n);
+    this.nextUnmarked = new Uint32Array(n);
     this.firstUnmarked = 1;
     for (var i=1; i<=n; ++i)
         this.marked[i-1] = 0;
+    this.stack = new Uint32Array(1300000);
+    this.maxLevel = 0;
 };
 Graph.prototype.dfsRec = function(n){
     var neig = this.neighbors(n);
@@ -37,6 +38,28 @@ Graph.prototype.clear = function(){
         this.prevUnmarked[i] = i;
         this.nextUnmarked[i] = i+2;
         this.firstUnmarked = 1;
+    };
+};
+Graph.prototype.bfsFast = function(n){
+    for (var i=0, l=this.marked.length; i<l; ++i)
+        this.marked[i] = 0;
+    this.stack[0]    = n;
+    this.level[n-1]  = 0;
+    this.marked[n-1] = 0;
+    for (var index = 0, count = 1; index < count; ++index){
+        var node  = this.stack[index];
+        var neigs = this.array[node-1];
+        if (neigs.length > 0) for (var i=neigs.length-1; i; --i){
+            var neig = neigs[i];
+            if (!this.marked[neig-1]) {
+                var level = this.level[node-1] + 1;
+                this.marked[neig-1] = 1;
+                this.level[neig-1]  = level;
+                this.stack[count++] = neig;
+                if (this.maxLevel < level)
+                    this.maxLevel = level;
+            };
+        };
     };
 };
 Graph.prototype.bfs = function(n,conexo,debug){
@@ -114,17 +137,25 @@ Graph.prototype.conexo =function(){
 	console.log("Rodei: "+i+" bfs.");
 }
 
-function ArrayGraph(n){
+function ArrayGraph(n,params){
     Graph.call(this,n);
+    params = params || {};
     this.size  = n;
-    this.array = new Array(n);
-    for (var i=0; i<n; ++i)
-        this.array[i] = [];
+    this.array = params.array || new Array(n);
+    if (!params.array)
+        for (var i=0; i<n; ++i)
+            this.array[i] = [];
+    //this.arestas = {};
 };
-ArrayGraph.prototype = new Graph();
+ArrayGraph.prototype = new Graph(0);
+//ArrayGraph.prototype.networkData = function(){
+//};
 ArrayGraph.prototype.addEdge = function(x,y){
+    //if (!this.arestas[[x,y]]){
+        //this.arestas[[x,y]] = true;
     this.array[x-1].push(y);
     this.array[y-1].push(x);
+    //};
 };
 ArrayGraph.prototype.hasEdge = function(x,y){
     for (var i=0,a=this.array[n],a=a.length; i<l; ++i)
@@ -141,7 +172,7 @@ function MatrixGraph(n){
     this.size   = n;
     this.matrix = new Matrix(n,n);
 };
-MatrixGraph.prototype = new Graph();
+MatrixGraph.prototype = new Graph(0);
 MatrixGraph.prototype.addEdge = function(x,y){
     this.matrix.set(x-1,y-1,1);
     this.matrix.set(y-1,x-1,1);
@@ -178,11 +209,17 @@ var loadGraphFromFile = function(file,Graph,callback){
         };
     });
     fileStream.on("end",function(){ 
+        //if (Graph === ArrayGraph){
+            //for (var i=0; i<graph.array.size; ++i){
+                //graph.array[i] = new Uint32Array(graph.array[i]);
+            //};
+            //console.log("!!!!!!!!!");
+        //};
         callback(graph);
     });
 };
 
-if (nodejs) module.exports = {
+if (typeof module !== "undefined") module.exports = {
     fromFile    : loadGraphFromFile,
     ArrayGraph  : ArrayGraph,
     MatrixGraph : MatrixGraph};
