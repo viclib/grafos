@@ -1,17 +1,18 @@
 var nodejs = typeof window === "undefined";
 if (typeof require !== "undefined") var fs = require("fs");
 
-function Matrix(w,h){
+function SymmetricBitMatrix(w){
     this.w      = w;
-    this.h      = h;
-    this.buffer = new Uint8Array((w*h + (8 - w*h % 8))/8);
+    this.buffer = new Uint8Array((w-1)*w/16+1);
 };
-Matrix.prototype.get = function(x,y){
-    var bitPos = this.w * y + x;
+SymmetricBitMatrix.prototype.get = function(x,y){
+    if (y > x){ var y_ = y; y = x; x = y_; };
+    var bitPos = this.w * y + x - (((y+1)*(y+2))>>1);
     return (this.buffer[~~(bitPos>>3)] >> (7 - (bitPos & 7))) & 1;
 };
-Matrix.prototype.set = function(x,y){
-    var bitPos = this.w * y + x;
+SymmetricBitMatrix.prototype.set = function(x,y){
+    if (y > x){ var y_ = y; y = x; x = y_; };
+    var bitPos = this.w * y + x - (((y+1)*(y+2))>>1);
     return this.buffer[~~(bitPos/8)] = this.buffer[~~(bitPos/8)] | (1 << (7 - (bitPos & 7)));
 };
 
@@ -23,6 +24,7 @@ function Graph(n){
     this.prevUnmarked  = new Uint32Array(n);
     this.nextUnmarked  = new Uint32Array(n);
     this.firstUnmarked = 1;
+    this.conexos       = [];
     for (var i=1; i<=n; ++i)
         this.marked[i-1] = 0;
 };
@@ -35,11 +37,12 @@ Graph.prototype.dfsRec = function(n){
 };
 Graph.prototype.clear = function(){
     for (var i=0, l=this.marked.length; i<l; ++i){
-        this.marked[i] = 0;
+        this.marked[i]       = 0;
         this.prevUnmarked[i] = i;
         this.nextUnmarked[i] = i+2;
-        this.firstUnmarked = 1;
     };
+    this.firstUnmarked = 1;
+    this.conexos       = [];
 };
 Graph.prototype.diameter = function(n){
     for (var i=0, l=this.marked.length; i<l; ++i)
@@ -66,29 +69,23 @@ Graph.prototype.diameter = function(n){
     return maxLevel;
 };
 Graph.prototype.bfs = function(n,conexo,debug){
-	if (!conexo) this.clear();
-    var stack = [n];
-    this.parent[n-1] = 0;
-    this.level[n-1]  = 0;
-    this.marked[n-1] = 1;
-
-	var self = this;
-	function feio(n){
+	function mark(n){
+        self.marked[n-1] = 1;
 		if (self.prevUnmarked[n-1] === 0)
 			self.firstUnmarked = self.nextUnmarked[n-1];
 		else
 			self.nextUnmarked[self.prevUnmarked[n-1]-1] = self.nextUnmarked[n-1];
 		if (self.nextUnmarked[n-1] !== self.size+1)
 			self.prevUnmarked[self.nextUnmarked[n-1]-1] = self.prevUnmarked[n-1];
-		//console.log("estou dentro de uma bfs no node ",n);
-		//console.log("-> marcado?",self.marked[n-1]);
-		//console.log("-> firstUnmarked = ",self.firstUnmarked);
-	};
-	feio(n);
-
-	// bag feio
-
-    if (debug) console.log("NOD\tLVL\tPAR");
+        conexos.push(n); };
+	if (!conexo) this.clear();
+	var self = this;
+    var stack = [n];
+    var conexos = [];
+    this.parent[n-1] = 0;
+    this.level[n-1]  = 0;
+    mark(n);
+    this.conexos.push(conexos);
     for (var index = 0; index < stack.length; ++index){
         var node  = stack[index];
         var neigs = this.neighbors(node);
@@ -98,19 +95,26 @@ Graph.prototype.bfs = function(n,conexo,debug){
             if (!this.marked[neig-1]) {
                 this.parent[neig-1] = node;
                 this.level[neig-1]  = this.level[node-1] + 1;
-                this.marked[neig-1] = 1;
-				feio(neig);
+                mark(neig);
                 stack.push(neig);
             };
         };
     };
 };
+Graph.prototype.conexo = function(){
+	this.clear();
+    while (this.firstUnmarked !== this.size+1)
+        this.bfs(this.firstUnmarked,true);
+    this.conexos.sort(function(a,b){ return b.length - a.length; });
+    return this.conexos;
+    //console.log(JSON.stringify(this.conexos));
+}
+
 Graph.prototype.dfs = function(n,debug){
     this.clear();
     var stack        = [n];
     this.parent[n-1] = 0;
     this.level[n-1]  = 0;
-    if (debug) console.log("NOD\tLVL\tPAR");
     while(stack.length > 0){
         var node = stack.pop()
         if (!this.marked[node-1]){
@@ -128,18 +132,28 @@ Graph.prototype.dfs = function(n,debug){
         };
     };
 };
-Graph.prototype.conexo =function(){
-	this.clear();
-	var i = 0;
-    while (this.firstUnmarked !== this.size+1){
-		//console.log("-> estou rodando um bfs a partir do node ",this.firstUnmarked);
-        this.bfs(this.firstUnmarked,true);
-		++i;
-		//console.log("-> BFS RODADA ... prox: ",this.firstUnmarked,this.size);
-    }
-	console.log("Rodei: "+i+" bfs.");
-}
-
+/*Graph.prototype.dfsFast = function(n,debug){
+    this.clear();
+    var count = 1;
+    this.stack[0]    = n;
+    this.parent[n-1] = 0;
+    this.level[n-1]  = 0;
+    while(count > 0){
+        var node = this.stack[--count];
+        if (!this.marked[node-1]){
+            var neigs = this.neighbors(node);
+            this.marked[node-1] = 1;
+            for (var i=neigs.length-1; i>=0; --i){
+                var neig = neigs[i];
+                if (!this.marked[neig-1]) {
+                    this.parent[neig-1] = node;
+                    this.level[neig-1] = this.level[node-1] + 1;
+                    this.stack[count++] = neig;
+                };
+            };
+        };
+    };
+};*/
 function ArrayGraph(n,params){
     Graph.call(this,n);
     params = params || {};
@@ -148,6 +162,7 @@ function ArrayGraph(n,params){
     if (!params.array)
         for (var i=0; i<n; ++i)
             this.array[i] = [];
+    this.className = "ArrayGraph";
     //this.arestas = {};
 };
 ArrayGraph.prototype = new Graph(0);
@@ -170,8 +185,9 @@ ArrayGraph.prototype.neighbors = function(n){
 
 function MatrixGraph(n){
     Graph.call(this,n);
-    this.size   = n;
-    this.matrix = new Matrix(n,n);
+    this.size      = n;
+    this.matrix    = new SymmetricBitMatrix(n);
+    this.className = "MatrixGraph";
 };
 MatrixGraph.prototype = new Graph(0);
 MatrixGraph.prototype.addEdge = function(x,y){
