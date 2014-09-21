@@ -1,7 +1,7 @@
 //http://www.html5rocks.com/en/tutorials/workers/basics/#toc-transferrables
 importScripts("patvicgraphlib.js");
-importScripts("http://localhost:8097/socket.io/socket.io.js");
-var socket = io('http://localhost:8097');
+importScripts("http://"+location.hostname+":8097/socket.io/socket.io.js");
+var socket = io("http://"+location.hostname+":8097");
 var graph;
 
 console.log("Carregando grafo...");
@@ -15,6 +15,9 @@ socket.on("graph",function(g){
             array[j][i] = arrays[k]; 
     };
     graph = new ArrayGraph(sizes.length,{array:array});
+});
+socket.on("stats",function(stats){
+    postMessage(stats);
 });
 var lastAlloc = Date.now();
 socket.on("workload",function(workload){
@@ -30,9 +33,9 @@ socket.on("workload",function(workload){
     var time = (Date.now() - start)/1000;
     var bfss = size/time;
     console.log("Processed workload in: "+time+" seconds ("+bfss+"BFS/s).");
-    console.log("Results:",results);
+    console.log("Results:",JSON.stringify(results));
     var reqSize = time < 0.5 ? size*2 : bfss*2;
-    socket.emit("results",results,time<0.5 ? size*2 : bfss*2);
+    socket.emit("results",results,time<0.5 ? size*2 : bfss*5);
 });
 socket.emit("results",[],5);
 

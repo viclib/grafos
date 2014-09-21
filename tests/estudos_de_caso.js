@@ -69,4 +69,3 @@ lib.fromFile(graphPath,usedClass,function(graph){
 
 });
 
-

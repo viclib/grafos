@@ -26,10 +26,11 @@ lib.fromFile(graphFile,lib.ArrayGraph,function(graph){
     var done = 0;
     var bfss = 0;
     var lastDone = 0;
+    var startTime = Date.now();
+    var stats = {};
     for (var node=1; node<=graph.size; ++node)
         if (diameters[node-1]!==-1) setDiameter(node,diameters[node-1]);
         else todo.push(node);
-
     console.log("Loaded diameters.");
     function setDiameter(node,diameter){
         if (!nodesByDiameter[diameter])
@@ -48,30 +49,25 @@ lib.fromFile(graphFile,lib.ArrayGraph,function(graph){
         });
     },1000);
     setInterval(function refresh(){
-        function formatTime(s){
-            return ""
-                + ("00"+(~~(s/60/60))).slice(-2) + ":"
-                + ("00"+(~~((s%(60*60))/60))).slice(-2) + ":"
-                + ("00"+(~~(s%(60)))).slice(-2);
-        };
+        stats.connectedClients = clients.length;
+        stats.computed = done;
+        stats.total = graph.size;
+        stats.rate = bfss;
+        stats.estimatedTime = ((graph.size - done)/bfss);
+        stats.ellapsedTime = ((Date.now()-startTime)/1000);
+        stats.maxDiameter = nodesByDiameter.length - 1;
+        stats.nodesByDiameter = [];
+        for (var i=0,l=nodesByDiameter.length; i<l; ++i)
+            stats.nodesByDiameter[i] = (nodesByDiameter[i]||[]).length;
+        stats.someNodesWithMaxDiameter = (nodesByDiameter[nodesByDiameter.length-1]||[])
+            .slice(0,4);
         exec("clear",function(err,stdout,stderr){
             util.puts(stdout);
             console.log("~~ PatVic Distributed Graph Computer ~~");
-            console.log("Connected clients: "+clients.length);
-            console.log("Computed: "+done+"/"+graph.size+" nodes.");
-            console.log("Max diameter: "+(nodesByDiameter.length-1));
-            console.log("Rate: "+bfss+" BFS/s.");
-            console.log("Estimated completion time: "+formatTime((graph.size - done)/bfss));
-            console.log("Num of nodes with a specific diameter: ");
-            for (var i=0,l=nodesByDiameter.length; i<l; ++i)
-                console.log("\t"+i+"\t"+(nodesByDiameter[i]||[]).length);
-            console.log("Some nodes with diameter="
-                +(nodesByDiameter.length-1)+": "
-                +JSON.stringify(
-                    (nodesByDiameter[nodesByDiameter.length-1]||[])
-                    .slice(0,20)));
+            console.log(JSON.stringify(stats,null,4));
+
         });
-    },100);
+    },500);
     setInterval(function(){
         bfss = (done - lastDone) / 3;
         lastDone = done;
@@ -97,7 +93,9 @@ lib.fromFile(graphFile,lib.ArrayGraph,function(graph){
         //clients[client.id] = client;
         clients.push(client);
 
-        
+        setInterval(function(){ 
+            socket.emit("stats",stats); 
+        },2000);
             
         socket.emit("graph",{
             size:graph.size, 
