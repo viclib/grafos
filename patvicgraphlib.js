@@ -193,10 +193,9 @@ MatrixGraph.prototype.addEdge = function(x,y){
 };
 MatrixGraph.prototype.neighbors = function(n){
     var neighbors = [];
-    for (var i=1, l=this.size; i<=l; ++i){
-        if (this.hasEdge(n,i))
+    for (var i=1, l=this.size; i<=l; ++i)
+        if (this.matrix.get(n-1,i-1))
             neighbors.push(i);
-    };
     return neighbors;
 };
 
