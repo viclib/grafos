@@ -1,0 +1,13 @@
+.markdown-body {
+   min-width: 200px;
+   max-width: 790px;
+   margin: 0 auto;
+   padding: 30px;
+}
+td {
+    text-align: center;
+}
+#fooo {
+    font-size: 8px;
+    background-color: black;
+}

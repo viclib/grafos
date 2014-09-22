@@ -12,7 +12,7 @@ var usableClasses = [lib.ArrayGraph, lib.MatrixGraph];
 var graphNames = ["as_graph","subdblp","dblp","simples"];
 
 var usedClass = usableClasses[0];
-var graphName = graphNames   [2];
+var graphName = graphNames   [0];
 var graphPath = "./../graphs/"+graphName+".txt";
 
 lib.fromFile(graphPath,usedClass,function(graph){
@@ -44,13 +44,21 @@ lib.fromFile(graphPath,usedClass,function(graph){
     //console.log(xy[0]);
     //console.log(xy[xy.length-1]);
 
+    var t = ellapsedTime(function(){
+        for (var i=1; i<graph.size; ++i){
+            if (i%100===0) console.log((i/graph.size).toFixed(2));
+            graph.eccentricity(i);
+        };
+    });
+    console.log("Time to run diameter: "+t+"s");
+
 
 
     //var t = ellapsedTime(function(){
         //for (var i=0; i<10; ++i)
-            //graph.bfs(i+1);
+            graph.eccentricity(i+1);
     //});
-    //console.log("10 DFSs time: "+t+"s");
+    //console.log("10 DFS/BFSs time: "+t+"s");
 
     //for (var k=0; k<=1; ++k){
         //var type = k === 0 ? "bfs" : "dfs";
