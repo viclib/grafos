@@ -46,22 +46,13 @@ Graph.prototype.clearState = function(){
     this.connecteds    = [];
 };
 Graph.prototype.bfs = function(n,dontClear){
-    function mark(n){
-        self.marked[n-1] = 1;
-        if (self.prevUnmarked[n-1] === 0)
-            self.firstUnmarked = self.nextUnmarked[n-1];
-        else
-            self.nextUnmarked[self.prevUnmarked[n-1]-1] = self.nextUnmarked[n-1];
-        if (self.nextUnmarked[n-1] !== self.size+1)
-            self.prevUnmarked[self.nextUnmarked[n-1]-1] = self.prevUnmarked[n-1];
-        connecteds.push(n); };
     if (!dontClear) this.clearState();
     var self         = this;
     var stack        = [n];
     var connecteds   = [];
     this.parent[n-1] = 0;
     this.level[n-1]  = 0;
-    mark(n);
+    this.mark(n,connecteds);
     this.connecteds.push(connecteds);
     for (var index = 0; index < stack.length; ++index){
         var node  = stack[index];
@@ -71,7 +62,7 @@ Graph.prototype.bfs = function(n,dontClear){
             if (!this.marked[neig-1]) {
                 this.parent[neig-1] = node;
                 this.level[neig-1]  = this.level[node-1] + 1;
-                mark(neig);
+                this.mark(neig,connecteds);
                 stack.push(neig);
             };
         };
@@ -98,17 +89,15 @@ Graph.prototype.dfs = function(n){
         };
     };
 };
-Graph.prototype.diameter = function(){
-    var maxLevel = 0;
-    var node = 0;
-    for (var i=1; i<=this.size; ++i){
-        var level = this.eccentricity(i);
-        if (level > maxLevel){
-            maxLevel = level;
-            node = i;
-        };
-    };
-    return {diameter: maxLevel, startNode: node};
+Graph.prototype.mark(n,connecteds){
+    this.marked[n-1] = 1;
+    if (this.prevUnmarked[n-1] === 0)
+        this.firstUnmarked = this.nextUnmarked[n-1];
+    else
+        this.nextUnmarked[this.prevUnmarked[n-1]-1] = this.nextUnmarked[n-1];
+    if (this.nextUnmarked[n-1] !== this.size+1)
+        this.prevUnmarked[this.nextUnmarked[n-1]-1] = this.prevUnmarked[n-1];
+    connecteds.push(n); 
 };
 Graph.prototype.eccentricity = function(n){
     for (var i=0, l=this.marked.length; i<l; ++i)
@@ -133,6 +122,18 @@ Graph.prototype.eccentricity = function(n){
         };
     };
     return maxLevel;
+};
+Graph.prototype.diameter = function(){
+    var maxLevel = 0;
+    var node = 0;
+    for (var i=1; i<=this.size; ++i){
+        var level = this.eccentricity(i);
+        if (level > maxLevel){
+            maxLevel = level;
+            node = i;
+        };
+    };
+    return {diameter: maxLevel, startNode: node};
 };
 Graph.prototype.output = function(){
     var dist = [];
