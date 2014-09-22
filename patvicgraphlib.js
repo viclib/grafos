@@ -100,6 +100,7 @@ Graph.prototype.mark = function(n,connecteds){
     connecteds.push(n); 
 };
 Graph.prototype.eccentricity = function(n){
+    // This must be fast, so we can't reuse Graph.prototype.bfs.
     for (var i=0, l=this.marked.length; i<l; ++i)
         this.marked[i] = 0;
     var maxLevel     = 0;
