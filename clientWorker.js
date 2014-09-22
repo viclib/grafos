@@ -33,7 +33,11 @@ socket.on("workload",function(workload){
     var time = (Date.now() - start)/1000;
     var bfss = size/time;
     console.log("Processed workload in: "+time+" seconds ("+bfss+"BFS/s).");
-    console.log("Results:",JSON.stringify(results));
+    //console.log("Results:"+JSON.stringify(results));
+    //console.log((results));
+    //console.log(results[0],results[1],results[2],results[3],results[4]);
+    //console.log(results.length);
+    //console.log(results[0]);
     var reqSize = time < 0.5 ? size*2 : bfss*2;
     socket.emit("results",results,time<0.5 ? size*2 : bfss*5);
 });

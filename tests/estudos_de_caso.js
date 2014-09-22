@@ -21,6 +21,8 @@ lib.fromFile(graphPath,usedClass,function(graph){
     console.log("GSize: "+graph.size+" nodes");
     console.log("Memory usage: "+(usedMem()/(1024*1024))+" MBs");
 
+
+
     //var conexos = graph.conexo();
     //console.log("Componentes conexos: ",conexos.length);
     //console.log("Tam. do maior componente conexo: ",conexos[0].length);
@@ -28,21 +30,22 @@ lib.fromFile(graphPath,usedClass,function(graph){
     //console.log(conexos.map(JSON.stringify).join("\n"));
 
     //graph.bfs(1);
-    var verticesComGrau = [];
-    for (var i=1, l=graph.size; i<=l; ++i){
-        var grau = graph.neighbors(i).length;
-        if (!verticesComGrau[grau]) verticesComGrau[grau] = [];
-        verticesComGrau[grau].push(i);
-    };
-    var xy = [];
-    for (var i=0; i<verticesComGrau.length; ++i){
-        var vertices = verticesComGrau[i];
-        if (vertices)
-            xy.push([i,vertices.length/graph.size])
-    };
-    console.log(JSON.stringify(xy));
-    console.log(xy[0]);
-    console.log(xy[xy.length-1]);
+
+    //var verticesComGrau = [];
+    //for (var i=1, l=graph.size; i<=l; ++i){
+        //var grau = graph.neighbors(i).length;
+        //if (!verticesComGrau[grau]) verticesComGrau[grau] = [];
+        //verticesComGrau[grau].push(i);
+    //};
+    //var xy = [];
+    //for (var i=0; i<verticesComGrau.length; ++i){
+        //var vertices = verticesComGrau[i];
+        //if (vertices)
+            //xy.push([i,vertices.length/graph.size])
+    //};
+    //console.log(JSON.stringify(xy));
+    //console.log(xy[0]);
+    //console.log(xy[xy.length-1]);
 
 
 

@@ -28,7 +28,8 @@ lib.fromFile(graphFile,lib.ArrayGraph,function(graph){
     var lastDone = 0;
     var startTime = Date.now();
     var stats = {};
-    for (var node=1; node<=graph.size; ++node)
+    //for (var node=1; node<=graph.size; ++node)
+    for (var node=graph.size; node>=1; --node)
         if (diameters[node-1]!==-1) setDiameter(node,diameters[node-1]);
         else todo.push(node);
     console.log("Loaded diameters.");
@@ -50,17 +51,16 @@ lib.fromFile(graphFile,lib.ArrayGraph,function(graph){
     },1000);
     setInterval(function refresh(){
         stats.connectedClients = clients.length;
-        stats.computed = done;
-        stats.total = graph.size;
-        stats.rate = bfss;
-        stats.estimatedTime = ((graph.size - done)/bfss);
-        stats.ellapsedTime = ((Date.now()-startTime)/1000);
-        stats.maxDiameter = nodesByDiameter.length - 1;
-        stats.nodesByDiameter = [];
+        stats.computed         = done;
+        stats.total            = graph.size;
+        stats.rate             = bfss;
+        stats.estimatedTime    = ((graph.size - done)/bfss);
+        stats.ellapsedTime     = ((Date.now()-startTime)/1000);
+        stats.maxDiameter      = nodesByDiameter.length - 1;
+        stats.nodesByDiameter  = [];
         for (var i=0,l=nodesByDiameter.length; i<l; ++i)
             stats.nodesByDiameter[i] = (nodesByDiameter[i]||[]).length;
-        stats.someNodesWithMaxDiameter = (nodesByDiameter[nodesByDiameter.length-1]||[])
-            .slice(0,4);
+        stats.someNodesWithMaxDiameter = (nodesByDiameter[nodesByDiameter.length-1]||[]).slice(0,4);
         exec("clear",function(err,stdout,stderr){
             util.puts(stdout);
             console.log("~~ PatVic Distributed Graph Computer ~~");
@@ -69,13 +69,10 @@ lib.fromFile(graphFile,lib.ArrayGraph,function(graph){
         });
     },500);
     setInterval(function(){
-        bfss = (done - lastDone) / 3;
+        bfss = (done - lastDone) / 15;
         lastDone = done;
-    },8000);
+    },15000);
     var clients = [];
-
-
-
     var arr = [];
     var sizes = [];
     for (var i=0; i<graph.array.length; ++i){

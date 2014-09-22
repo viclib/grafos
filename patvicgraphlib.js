@@ -47,14 +47,14 @@ Graph.prototype.clear = function(){
 Graph.prototype.diameter = function(n){
     for (var i=0, l=this.marked.length; i<l; ++i)
         this.marked[i] = 0;
-    var maxLevel = 0;
+    var maxLevel     = 0;
     this.stack[0]    = n;
     this.level[n-1]  = 0;
     this.marked[n-1] = 0;
     for (var index = 0, count = 1; index < count; ++index){
         var node  = this.stack[index];
         var neigs = this.array[node-1];
-        if (neigs.length > 0) for (var i=neigs.length-1; i; --i){
+        if (neigs.length > 0) for (var i=neigs.length-1; i>=0; --i){
             var neig = neigs[i];
             if (!this.marked[neig-1]) {
                 var level = this.level[node-1] + 1;
