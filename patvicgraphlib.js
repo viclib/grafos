@@ -89,7 +89,7 @@ Graph.prototype.dfs = function(n){
         };
     };
 };
-Graph.prototype.mark(n,connecteds){
+Graph.prototype.mark = function(n,connecteds){
     this.marked[n-1] = 1;
     if (this.prevUnmarked[n-1] === 0)
         this.firstUnmarked = this.nextUnmarked[n-1];
