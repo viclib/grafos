@@ -9,11 +9,10 @@ var usedMem = (function(){
 })();
 
 var usableClasses = [lib.ArrayGraph, lib.MatrixGraph];
-var graphNames = ["as_graph","subdblp","dblp","simples"];
-
-var usedClass = usableClasses[0];
-var graphName = graphNames   [0];
-var graphPath = "./../graphs/"+graphName+".txt";
+var graphNames    = ["as_graph","subdblp","dblp","simples"];
+var usedClass     = usableClasses[0];
+var graphName     = graphNames[0];
+var graphPath     = "./../graphs/"+graphName+".txt";
 
 lib.fromFile(graphPath,usedClass,function(graph){
     console.log("Graph: "+graphName);
@@ -21,12 +20,6 @@ lib.fromFile(graphPath,usedClass,function(graph){
     console.log("GSize: "+graph.size+" nodes");
     console.log("Memory usage: "+(usedMem()/(1024*1024))+" MBs");
 
-    var diam;
-    var time = ellapsedTime(function(){
-        diam = graph.diameter();
-    });
-    console.log(diam);
-    console.log(time+"s");
     //var conexos = graph.conexo();
     //console.log("Componentes conexos: ",conexos.length);
     //console.log("Tam. do maior componente conexo: ",conexos[0].length);
@@ -63,7 +56,7 @@ lib.fromFile(graphPath,usedClass,function(graph){
 
     //var t = ellapsedTime(function(){
         //for (var i=0; i<10; ++i)
-            graph.eccentricity(i+1);
+            //graph.eccentricity(i+1);
     //});
     //console.log("10 DFS/BFSs time: "+t+"s");
 

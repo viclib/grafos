@@ -80,8 +80,7 @@ Graph.prototype.eccentricity = function(n){
     };
     return maxLevel;
 };
-Graph.prototype.bfs = function(n,runningConnected,debug){
-    // TODO: split into specialized BFS functions
+Graph.prototype.bfs = function(n,dontClear){
 	function mark(n){
         self.marked[n-1] = 1;
 		if (self.prevUnmarked[n-1] === 0)
@@ -91,10 +90,10 @@ Graph.prototype.bfs = function(n,runningConnected,debug){
 		if (self.nextUnmarked[n-1] !== self.size+1)
 			self.prevUnmarked[self.nextUnmarked[n-1]-1] = self.prevUnmarked[n-1];
         connecteds.push(n); };
-	if (!runningConnected) this.clearState();
-	var self = this;
-    var stack = [n];
-    var connecteds = [];
+	if (!dontClear) this.clearState();
+	var self         = this;
+    var stack        = [n];
+    var connecteds   = [];
     this.parent[n-1] = 0;
     this.level[n-1]  = 0;
     mark(n);
@@ -102,7 +101,6 @@ Graph.prototype.bfs = function(n,runningConnected,debug){
     for (var index = 0; index < stack.length; ++index){
         var node  = stack[index];
         var neigs = this.neighbors(node);
-        if (debug) console.log(node+"\t"+this.level[node-1]+"\t"+this.parent[node-1])
         for (var i = 0, l = neigs.length; i<l; ++i){
             var neig = neigs[i];
             if (!this.marked[neig-1]) {
@@ -136,7 +134,7 @@ Graph.prototype.output = function(){
     for (var i=0,l=dist.length; i<l; ++i)
         console.log(i,((dist[i]||0)/this.size));
 };
-Graph.prototype.dfs = function(n,debug){
+Graph.prototype.dfs = function(n){
     this.clearState();
     var stack        = [n];
     this.parent[n-1] = 0;
@@ -144,14 +142,13 @@ Graph.prototype.dfs = function(n,debug){
     while(stack.length > 0){
         var node = stack.pop()
         if (!this.marked[node-1]){
-            if (debug) console.log(node+"\t"+this.level[node-1]+"\t"+this.parent[node-1]);
             var neigs = this.neighbors(node);
             this.marked[node-1] = 1;
             for (var i=neigs.length-1; i>=0; --i){
                 var neig = neigs[i];
                 if (!this.marked[neig-1]) {
                     this.parent[neig-1] = node;
-                    this.level[neig-1] = this.level[node-1] + 1;
+                    this.level[neig-1]  = this.level[node-1] + 1;
                     stack.push(neig);
                 };
             };
@@ -161,22 +158,18 @@ Graph.prototype.dfs = function(n,debug){
 
 function ArrayGraph(n,params){
     Graph.call(this,n);
-    params = params || {};
+    params     = params || {};
     this.size  = n;
     this.array = params.array || new Array(n);
     if (!params.array)
         for (var i=0; i<n; ++i)
             this.array[i] = [];
     this.className = "ArrayGraph";
-    //this.arestas = {};
 };
 ArrayGraph.prototype = new Graph(0);
 ArrayGraph.prototype.addEdge = function(x,y){
-    //if (!this.arestas[[x,y]]){
-        //this.arestas[[x,y]] = true;
     this.array[x-1].push(y);
     this.array[y-1].push(x);
-    //};
 };
 ArrayGraph.prototype.hasEdge = function(x,y){
     for (var i=0,a=this.array[n],a=a.length; i<l; ++i)
@@ -214,7 +207,7 @@ MatrixGraph.prototype.neighbors = function(n){
 var loadGraphFromFile = function(file,GraphClass,callback){
     var graph;
     var fileStream = fs.createReadStream(file,{encoding:"utf8"});
-    var file = "";
+    var file       = "";
     fileStream.on("data",function(chunk){
         var newLineIndex;
         file = file + chunk;
