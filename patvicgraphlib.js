@@ -46,17 +46,17 @@ Graph.prototype.clearState = function(){
     this.connecteds    = [];
 };
 Graph.prototype.bfs = function(n,dontClear){
-	function mark(n){
+    function mark(n){
         self.marked[n-1] = 1;
-		if (self.prevUnmarked[n-1] === 0)
-			self.firstUnmarked = self.nextUnmarked[n-1];
-		else
-			self.nextUnmarked[self.prevUnmarked[n-1]-1] = self.nextUnmarked[n-1];
-		if (self.nextUnmarked[n-1] !== self.size+1)
-			self.prevUnmarked[self.nextUnmarked[n-1]-1] = self.prevUnmarked[n-1];
+        if (self.prevUnmarked[n-1] === 0)
+            self.firstUnmarked = self.nextUnmarked[n-1];
+        else
+            self.nextUnmarked[self.prevUnmarked[n-1]-1] = self.nextUnmarked[n-1];
+        if (self.nextUnmarked[n-1] !== self.size+1)
+            self.prevUnmarked[self.nextUnmarked[n-1]-1] = self.prevUnmarked[n-1];
         connecteds.push(n); };
-	if (!dontClear) this.clearState();
-	var self         = this;
+    if (!dontClear) this.clearState();
+    var self         = this;
     var stack        = [n];
     var connecteds   = [];
     this.parent[n-1] = 0;
@@ -150,7 +150,7 @@ Graph.prototype.output = function(){
         console.log(i,((dist[i]||0)/this.size));
 };
 Graph.prototype.connected = function(){
-	this.clearState();
+    this.clearState();
     while (this.firstUnmarked !== this.size+1)
         this.bfs(this.firstUnmarked,true);
     this.connecteds.sort(function(a,b){ return b.length - a.length; });
