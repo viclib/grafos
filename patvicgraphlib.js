@@ -1,6 +1,12 @@
+// A simple graph library in JavaScript
+// By Victor Maia (vh@viclib.com) and Patrícia Kovaleski (patriciakovaleski@gmail.com)
 var nodejs = typeof window === "undefined";
 if (typeof require !== "undefined") var fs = require("fs");
 
+// This is an implementation of symmetric bit matrix. It uses only 1 bit per
+// cell and only stores a little less than half of the cells, as it is
+// symmetric. The total used memory is ((w-1)*w/16+1) bytes, where w is the
+// width of the matrix.
 function SymmetricBitMatrix(w){
     this.w      = w;
     this.buffer = new Uint8Array((w-1)*w/16+1);
@@ -16,6 +22,8 @@ SymmetricBitMatrix.prototype.set = function(x,y){
     return this.buffer[~~(bitPos/8)] = this.buffer[~~(bitPos/8)] | (1 << (7 - (bitPos & 7)));
 };
 
+// This is the main Graph class. It implements the common interface of a graph,
+// including most of the functions used in the library, such as BFS and DFS. 
 function Graph(n){
     this.parent        = new Uint32Array(n);
     this.level         = new Uint8Array(n);
@@ -24,16 +32,9 @@ function Graph(n){
     this.prevUnmarked  = new Uint32Array(n);
     this.nextUnmarked  = new Uint32Array(n);
     this.firstUnmarked = 1;
-    this.connecteds       = [];
+    this.connecteds    = [];
     for (var i=1; i<=n; ++i)
         this.marked[i-1] = 0;
-};
-Graph.prototype.dfsRec = function(n){
-    var neig = this.neighbors(n);
-    this.marked[n-1] = 1;
-    for (var i=0, l=neig.length; i<l; ++i)
-        if (!this.marked[neig[i]-1])
-            this.dfs(neig[i]);
 };
 Graph.prototype.clearState = function(){
     for (var i=0, l=this.marked.length; i<l; ++i){
@@ -43,6 +44,59 @@ Graph.prototype.clearState = function(){
     };
     this.firstUnmarked = 1;
     this.connecteds    = [];
+};
+Graph.prototype.bfs = function(n,dontClear){
+	function mark(n){
+        self.marked[n-1] = 1;
+		if (self.prevUnmarked[n-1] === 0)
+			self.firstUnmarked = self.nextUnmarked[n-1];
+		else
+			self.nextUnmarked[self.prevUnmarked[n-1]-1] = self.nextUnmarked[n-1];
+		if (self.nextUnmarked[n-1] !== self.size+1)
+			self.prevUnmarked[self.nextUnmarked[n-1]-1] = self.prevUnmarked[n-1];
+        connecteds.push(n); };
+	if (!dontClear) this.clearState();
+	var self         = this;
+    var stack        = [n];
+    var connecteds   = [];
+    this.parent[n-1] = 0;
+    this.level[n-1]  = 0;
+    mark(n);
+    this.connecteds.push(connecteds);
+    for (var index = 0; index < stack.length; ++index){
+        var node  = stack[index];
+        var neigs = this.neighbors(node);
+        for (var i = 0, l = neigs.length; i<l; ++i){
+            var neig = neigs[i];
+            if (!this.marked[neig-1]) {
+                this.parent[neig-1] = node;
+                this.level[neig-1]  = this.level[node-1] + 1;
+                mark(neig);
+                stack.push(neig);
+            };
+        };
+    };
+};
+Graph.prototype.dfs = function(n){
+    this.clearState();
+    var stack        = [n];
+    this.parent[n-1] = 0;
+    this.level[n-1]  = 0;
+    while(stack.length > 0){
+        var node = stack.pop()
+        if (!this.marked[node-1]){
+            var neigs = this.neighbors(node);
+            this.marked[node-1] = 1;
+            for (var i=neigs.length-1; i>=0; --i){
+                var neig = neigs[i];
+                if (!this.marked[neig-1]) {
+                    this.parent[neig-1] = node;
+                    this.level[neig-1]  = this.level[node-1] + 1;
+                    stack.push(neig);
+                };
+            };
+        };
+    };
 };
 Graph.prototype.diameter = function(){
     var maxLevel = 0;
@@ -80,45 +134,6 @@ Graph.prototype.eccentricity = function(n){
     };
     return maxLevel;
 };
-Graph.prototype.bfs = function(n,dontClear){
-	function mark(n){
-        self.marked[n-1] = 1;
-		if (self.prevUnmarked[n-1] === 0)
-			self.firstUnmarked = self.nextUnmarked[n-1];
-		else
-			self.nextUnmarked[self.prevUnmarked[n-1]-1] = self.nextUnmarked[n-1];
-		if (self.nextUnmarked[n-1] !== self.size+1)
-			self.prevUnmarked[self.nextUnmarked[n-1]-1] = self.prevUnmarked[n-1];
-        connecteds.push(n); };
-	if (!dontClear) this.clearState();
-	var self         = this;
-    var stack        = [n];
-    var connecteds   = [];
-    this.parent[n-1] = 0;
-    this.level[n-1]  = 0;
-    mark(n);
-    this.connecteds.push(connecteds);
-    for (var index = 0; index < stack.length; ++index){
-        var node  = stack[index];
-        var neigs = this.neighbors(node);
-        for (var i = 0, l = neigs.length; i<l; ++i){
-            var neig = neigs[i];
-            if (!this.marked[neig-1]) {
-                this.parent[neig-1] = node;
-                this.level[neig-1]  = this.level[node-1] + 1;
-                mark(neig);
-                stack.push(neig);
-            };
-        };
-    };
-};
-Graph.prototype.connected = function(){
-	this.clearState();
-    while (this.firstUnmarked !== this.size+1)
-        this.bfs(this.firstUnmarked,true);
-    this.connecteds.sort(function(a,b){ return b.length - a.length; });
-    return this.connecteds;
-};
 Graph.prototype.output = function(){
     var dist = [];
     for (var i=1; i<=this.size; ++i){
@@ -134,28 +149,15 @@ Graph.prototype.output = function(){
     for (var i=0,l=dist.length; i<l; ++i)
         console.log(i,((dist[i]||0)/this.size));
 };
-Graph.prototype.dfs = function(n){
-    this.clearState();
-    var stack        = [n];
-    this.parent[n-1] = 0;
-    this.level[n-1]  = 0;
-    while(stack.length > 0){
-        var node = stack.pop()
-        if (!this.marked[node-1]){
-            var neigs = this.neighbors(node);
-            this.marked[node-1] = 1;
-            for (var i=neigs.length-1; i>=0; --i){
-                var neig = neigs[i];
-                if (!this.marked[neig-1]) {
-                    this.parent[neig-1] = node;
-                    this.level[neig-1]  = this.level[node-1] + 1;
-                    stack.push(neig);
-                };
-            };
-        };
-    };
+Graph.prototype.connected = function(){
+	this.clearState();
+    while (this.firstUnmarked !== this.size+1)
+        this.bfs(this.firstUnmarked,true);
+    this.connecteds.sort(function(a,b){ return b.length - a.length; });
+    return this.connecteds;
 };
 
+// ArrayGraph is an implementation of Graph using an adjacency dynamic array.
 function ArrayGraph(n,params){
     Graph.call(this,n);
     params     = params || {};
@@ -171,16 +173,11 @@ ArrayGraph.prototype.addEdge = function(x,y){
     this.array[x-1].push(y);
     this.array[y-1].push(x);
 };
-ArrayGraph.prototype.hasEdge = function(x,y){
-    for (var i=0,a=this.array[n],a=a.length; i<l; ++i)
-        if (a[i] === y)
-            return true;
-    return false;
-};
 ArrayGraph.prototype.neighbors = function(n){
     return this.array[n-1];
 };
 
+// MatrixGraph is an implementation of Graph using an adjacency matrix.
 function MatrixGraph(n){
     Graph.call(this,n);
     this.size      = n;
@@ -192,9 +189,6 @@ MatrixGraph.prototype.addEdge = function(x,y){
     this.matrix.set(x-1,y-1);
     this.matrix.set(y-1,x-1);
 };
-MatrixGraph.prototype.hasEdge = function(x,y){
-    return this.matrix.get(x-1,y-1);
-};
 MatrixGraph.prototype.neighbors = function(n){
     var neighbors = [];
     for (var i=1, l=this.size; i<=l; ++i){
@@ -204,6 +198,7 @@ MatrixGraph.prototype.neighbors = function(n){
     return neighbors;
 };
 
+// This is a simple helper to populate a graph from a file using streams.
 var loadGraphFromFile = function(file,GraphClass,callback){
     var graph;
     var fileStream = fs.createReadStream(file,{encoding:"utf8"});
