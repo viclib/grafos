@@ -1,0 +1,74 @@
+<html>
+<head>
+<script src="draw.js"></script>
+<style>
+* {margin: 0px;padding: 0px;box-sizing: border-box;}
+canvas {border: 2px solid black;}
+</style>
+</head>
+<body>
+<script>
+function render(p){
+    var e = document.createElement("div");
+    e.style.cssText = p.css;
+    e.style.position = "absolute";
+    e.style.left = p.x;
+    e.style.top = p.y;
+    e.style.width = p.w;
+    e.style.height = p.h;
+    e.style.boxSizing = "border-box";
+    e.style.transform = "translate(-50%, -50%)";
+    if (p.class) e.className = p.class;
+    if (p.html) e.innerHTML = p.html;
+    if (p.child) for (var c=p.child, i=0, l=c.length; i<l; ++i)
+        e.appendChild(render(c[i]));
+    return e;
+};
+var draw = new Draw({parent:document.body,w:600,h:400});
+/*draw.rect({x:50,y:50,w:300,h:300,fill:"#AAAAFF",stroke:"#AAFFAA"});*/
+
+draw.graph({
+    x: 000,
+    y: 000,
+    w: 400,
+    h: 200,
+    xrange:[0,100], 
+    yrange:[0,200],
+    data:[{ 
+        points:[
+            [0,0],
+            [10,70],
+            [20,60],
+            [30,20],
+            [40,10],
+            [50,20],
+            [60,40],
+            [70,60],
+            [80,80],
+            [90,80],
+            [100,200]],
+        lineWidth: 3,
+        stroke: "blue"
+    }],
+});
+
+var foo = render({
+    x: "50%",
+    y: "50%",
+    w: "100%",
+    h: 120,
+    css: "border: 8px solid black",
+    html: "wat",
+    child: [{
+        x: "50%",
+        y: "50%",
+        css: "border: 8px solid blue;",
+        html: "wooow"
+    }]});
+
+/*document.body.appendChild(foo);*/
+
+
+</script>
+</body>
+</html>
