@@ -20,6 +20,13 @@ lib.fromFile(graphPath,usedClass,function(graph){
     console.log("Class: "+graph.className);
     console.log("GSize: "+graph.size+" nodes");
     console.log("Memory usage: "+(usedMem()/(1024*1024))+" MBs");
+
+    var diam;
+    var time = ellapsedTime(function(){
+        diam = graph.diameter();
+    });
+    console.log(diam);
+    console.log(time+"s");
     //var conexos = graph.conexo();
     //console.log("Componentes conexos: ",conexos.length);
     //console.log("Tam. do maior componente conexo: ",conexos[0].length);
@@ -44,13 +51,13 @@ lib.fromFile(graphPath,usedClass,function(graph){
     //console.log(xy[0]);
     //console.log(xy[xy.length-1]);
 
-    var t = ellapsedTime(function(){
-        for (var i=1; i<graph.size; ++i){
-            if (i%100===0) console.log((i/graph.size).toFixed(2));
-            graph.eccentricity(i);
-        };
-    });
-    console.log("Time to run diameter: "+t+"s");
+    //var t = ellapsedTime(function(){
+        //for (var i=1; i<graph.size; ++i){
+            //if (i%100===0) console.log((i/graph.size).toFixed(2));
+            //graph.eccentricity(i);
+        //};
+    //});
+    //console.log("Time to run diameter: "+t+"s");
 
 
 

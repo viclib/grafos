@@ -28,7 +28,7 @@ socket.on("workload",function(workload){
     var results = [];
     for (var i=0; i<size; ++i){
         var node = workload[i];
-        results.push(graph.diameter(node));
+        results.push(graph.eccentricity(node));
     };
     var time = (Date.now() - start)/1000;
     var bfss = size/time;
