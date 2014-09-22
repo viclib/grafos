@@ -60,16 +60,16 @@ Draw.prototype.text = function(p){
 };
 Draw.prototype.graph = function(p){
     // Label dimension
-    var xlw = 40;
-    var xlh = 20;
-    var ylw = 40;
-    var ylh = 20;
+    var xlw = p.xLabel.w || 40;
+    var xlh = p.xLabel.h || 20;
+    var ylw = p.yLabel.w || 40;
+    var ylh = p.yLabel.h || 20;
     // Container coordinates
     var x = p.x;
     var y = p.y;
     var w = p.w;
     var h = p.h;
-    this.rect({x:x, y:y, w:w, h:h, lineWidth: 2, stroke:"black"});
+    //this.rect({x:x, y:y, w:w, h:h, lineWidth: 2, stroke:"black"});
     // Graph coordinates
     var gx = x + ylw*0.5; // graph
     var gy = y - xlh*0.5;
@@ -92,15 +92,20 @@ Draw.prototype.graph = function(p){
             var pt = pts[i];
             var px = ((pt[0] - dw*0.5) - dx) / dw * gw + gx;
             var py = ((dh*0.5 - pt[1]) - dy) / dh * gh + gy;
+            if (d.circleFill) this.circle({x:px,y:py,r:3,fill:d.circleFill});
             newPts.push([px,py]); };
-        this.bezier({points: newPts, lineWidth: d.lineWidth, stroke:d.stroke, fill:d.fill});
+        if (d.lineStroke)
+            this.bezier({points: newPts, lineWidth: d.lineWidth, stroke:d.lineStroke, fill:d.fill});
     };
     var xls = (Math.floor(gw / xlw));
     var xlw = gw / xls;
-    for (var i=0; i<xls; ++i){
-        var xlx = gx - gw*0.5 + xlw * (i + 0.5);
+    var xlc = p.xLabel.center;
+    for (var i=0; i<xls+(xlc?0:1); ++i){
+        var xlx = gx - gw*0.5 + xlw * (i + (xlc?0.5:0));
         var xly = gy + gh*0.5 + xlh * 0.5;
-        this.rect({x:xlx, y:xly, w:xlw-2, h:xlh-2, stroke:"#DDDDDD"});
+        var xldx = ~~((xlx - gx) / gw * dw + dw * 0.5 + dx);
+        //this.rect({x:xlx, y:xly, w:xlw-2, h:xlh-2, stroke:"#DDDDDD"});
+        this.text({x:xlx, y:xly, text:xldx, fill:"black", font:"12px Verdana"});
     };
 
     var yls = (Math.floor(gh / ylh));
@@ -108,12 +113,31 @@ Draw.prototype.graph = function(p){
     for (var i=0; i<yls; ++i){
         var ylx = gx - gw*0.5 - ylw * 0.5;
         var yly = gy - gh*0.5 + ylh * (i + 0.5);
-        var yldy = ~~((gy - yly) / gh * dh + dh * 0.5 + dy);
+        var yldy = ((gy - yly) / gh * dh + dh * 0.5 + dy);
         //var yldy = yly;
         //this.rect({x:ylx, y:yly, w:ylw-2, h:ylh-2, stroke:"#DDDDDD"});
-        this.text({x:ylx, y:yly, text:yldy, fill:"black"});
+        this.text({x:ylx, y:yly, text:yldy.toFixed(0), fill:"black", font:"12px Verdana"});
     };
 
+
+    if (p.title)
+        draw.text({
+            text:p.title.text,
+            x:0,
+            y:-gh*0.5 - 20,
+            font:p.title.font});
+    if (p.xLabel)
+        this.text({
+            text:p.xLabel.text,
+            x:gw*0.5,
+            y:gh*0.5 + 14,
+            font:p.yLabel.font});
+    if (p.yLabel)
+        this.text({
+            text:p.yLabel.text,
+            x:-gw*0.5,
+            y:-gh*0.5 - 20,
+            font:p.yLabel.font});
     //this.circle({x:gx,y:gy,r:2,text:"AFF",fill:"steelblue"});
     //this.text({x:gx,y:gy,r:2,text:"AFF",fill:"steelblue"});
 

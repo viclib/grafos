@@ -1,14 +1,3 @@
-##Simple JavaScript Graph Library
-#### By Victor Maia and Patrícia Kovaleski
---
-Just a simple graph library in JavaScript for a school assignment. Yet, it has some nice optimisations so might actually be able to do the job if you, for some reason, need to perform that kind of graph processing on JavaScript.
-
-### Usage
-
-Pretty much all use cases are explained on the example below. To test it, just run `node tests/example.js` from this folder.
-
-
-```javascript
 // require lib if we are in node.js
 if (typeof window === "undefined")
     lib = require("./../patvicgraphlib.js"); 
@@ -91,9 +80,3 @@ console.log(graph.diameter());
 
 // And this prints an output with some stuff asked by our teacher:
 graph.output();
-```
-
-### Distributed Graph Computing Server
-
-
-You can also open a distributed server to compute graph properties. Just use the command `node server.js` on this folder and access `index.html` from a browser. Each client that connects using a browser will contribute to the computation without requiring any additional software installation.

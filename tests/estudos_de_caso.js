@@ -20,9 +20,6 @@ lib.fromFile(graphPath,usedClass,function(graph){
     console.log("Class: "+graph.className);
     console.log("GSize: "+graph.size+" nodes");
     console.log("Memory usage: "+(usedMem()/(1024*1024))+" MBs");
-
-
-
     //var conexos = graph.conexo();
     //console.log("Componentes conexos: ",conexos.length);
     //console.log("Tam. do maior componente conexo: ",conexos[0].length);

@@ -24,7 +24,7 @@ function Graph(n){
     this.prevUnmarked  = new Uint32Array(n);
     this.nextUnmarked  = new Uint32Array(n);
     this.firstUnmarked = 1;
-    this.conexos       = [];
+    this.connecteds       = [];
     for (var i=1; i<=n; ++i)
         this.marked[i-1] = 0;
 };
@@ -35,16 +35,28 @@ Graph.prototype.dfsRec = function(n){
         if (!this.marked[neig[i]-1])
             this.dfs(neig[i]);
 };
-Graph.prototype.clear = function(){
+Graph.prototype.clearState = function(){
     for (var i=0, l=this.marked.length; i<l; ++i){
         this.marked[i]       = 0;
         this.prevUnmarked[i] = i;
         this.nextUnmarked[i] = i+2;
     };
     this.firstUnmarked = 1;
-    this.conexos       = [];
+    this.connecteds    = [];
 };
-Graph.prototype.diameter = function(n){
+Graph.prototype.diameter = function(){
+    var maxLevel = 0;
+    var node = 0;
+    for (var i=1; i<=this.size; ++i){
+        var level = this.eccentricity(i);
+        if (level > maxLevel){
+            maxLevel = level;
+            node = i;
+        };
+    };
+    return {diameter: maxLevel, startNode: node};
+};
+Graph.prototype.eccentricity = function(n){
     for (var i=0, l=this.marked.length; i<l; ++i)
         this.marked[i] = 0;
     var maxLevel     = 0;
@@ -68,7 +80,8 @@ Graph.prototype.diameter = function(n){
     };
     return maxLevel;
 };
-Graph.prototype.bfs = function(n,conexo,debug){
+Graph.prototype.bfs = function(n,runningConnected,debug){
+    // TODO: split into specialized BFS functions
 	function mark(n){
         self.marked[n-1] = 1;
 		if (self.prevUnmarked[n-1] === 0)
@@ -77,15 +90,15 @@ Graph.prototype.bfs = function(n,conexo,debug){
 			self.nextUnmarked[self.prevUnmarked[n-1]-1] = self.nextUnmarked[n-1];
 		if (self.nextUnmarked[n-1] !== self.size+1)
 			self.prevUnmarked[self.nextUnmarked[n-1]-1] = self.prevUnmarked[n-1];
-        conexos.push(n); };
-	if (!conexo) this.clear();
+        connecteds.push(n); };
+	if (!runningConnected) this.clearState();
 	var self = this;
     var stack = [n];
-    var conexos = [];
+    var connecteds = [];
     this.parent[n-1] = 0;
     this.level[n-1]  = 0;
     mark(n);
-    this.conexos.push(conexos);
+    this.connecteds.push(connecteds);
     for (var index = 0; index < stack.length; ++index){
         var node  = stack[index];
         var neigs = this.neighbors(node);
@@ -101,17 +114,30 @@ Graph.prototype.bfs = function(n,conexo,debug){
         };
     };
 };
-Graph.prototype.conexo = function(){
-	this.clear();
+Graph.prototype.connected = function(){
+	this.clearState();
     while (this.firstUnmarked !== this.size+1)
         this.bfs(this.firstUnmarked,true);
-    this.conexos.sort(function(a,b){ return b.length - a.length; });
-    return this.conexos;
-    //console.log(JSON.stringify(this.conexos));
-}
-
+    this.connecteds.sort(function(a,b){ return b.length - a.length; });
+    return this.connecteds;
+};
+Graph.prototype.output = function(){
+    var dist = [];
+    for (var i=1; i<=this.size; ++i){
+        var g = this.neighbors(i).length;
+        dist[g] = (dist[g] || 0)+1;
+    };
+    var edgeCount = 0;
+    for (var i=1; i<=this.size; ++i)
+        edgeCount += this.neighbors(i).length;
+    console.log("# n = "+this.size);
+    console.log("# m = "+edgeCount);
+    console.log("# d_medio = "+edgeCount / this.size);
+    for (var i=0,l=dist.length; i<l; ++i)
+        console.log(i,((dist[i]||0)/this.size));
+};
 Graph.prototype.dfs = function(n,debug){
-    this.clear();
+    this.clearState();
     var stack        = [n];
     this.parent[n-1] = 0;
     this.level[n-1]  = 0;
@@ -132,28 +158,7 @@ Graph.prototype.dfs = function(n,debug){
         };
     };
 };
-/*Graph.prototype.dfsFast = function(n,debug){
-    this.clear();
-    var count = 1;
-    this.stack[0]    = n;
-    this.parent[n-1] = 0;
-    this.level[n-1]  = 0;
-    while(count > 0){
-        var node = this.stack[--count];
-        if (!this.marked[node-1]){
-            var neigs = this.neighbors(node);
-            this.marked[node-1] = 1;
-            for (var i=neigs.length-1; i>=0; --i){
-                var neig = neigs[i];
-                if (!this.marked[neig-1]) {
-                    this.parent[neig-1] = node;
-                    this.level[neig-1] = this.level[node-1] + 1;
-                    this.stack[count++] = neig;
-                };
-            };
-        };
-    };
-};*/
+
 function ArrayGraph(n,params){
     Graph.call(this,n);
     params = params || {};
@@ -206,7 +211,7 @@ MatrixGraph.prototype.neighbors = function(n){
     return neighbors;
 };
 
-var loadGraphFromFile = function(file,Graph,callback){
+var loadGraphFromFile = function(file,GraphClass,callback){
     var graph;
     var fileStream = fs.createReadStream(file,{encoding:"utf8"});
     var file = "";
@@ -215,7 +220,7 @@ var loadGraphFromFile = function(file,Graph,callback){
         file = file + chunk;
         while ((newLineIndex = file.indexOf("\n")) !== -1){
             if (!graph)
-                graph = new Graph(Number(file.slice(0,newLineIndex)));
+                graph = new GraphClass(Number(file.slice(0,newLineIndex)));
             else {
                 var spaceIndex = file.indexOf(" ");
                 graph.addEdge(
@@ -226,12 +231,6 @@ var loadGraphFromFile = function(file,Graph,callback){
         };
     });
     fileStream.on("end",function(){ 
-        //if (Graph === ArrayGraph){
-            //for (var i=0; i<graph.array.size; ++i){
-                //graph.array[i] = new Uint32Array(graph.array[i]);
-            //};
-            //console.log("!!!!!!!!!");
-        //};
         callback(graph);
     });
 };

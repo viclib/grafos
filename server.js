@@ -1,15 +1,27 @@
+/* 
+Distributed Graph Diameter Computing Server
+Author: Victor Maia (vh@viclib.com)
+
+This file starts a distributed graph diameter computing server on TCP port 8097
+using socket.io. The main node distributes the workload (that is, running BFSs)
+among its clients. Start it with the command `node server.js`. Then, access
+index.html (you must serve it somehow) using any regular browser. Each
+connected browser will contribute to the computation of the diameter of the
+graph.
+
+TODO: 
+-> fix client count bug
+-> open the HTTP server itself
+-> add more computation options (instead of just diameter)
+-> figure out if any of this will ever be done
+*/
+
 var lib  = require("./patvicgraphlib.js");
 var io   = require('socket.io').listen(8097);
 var fs   = require("fs");
 var exec = require("child_process").exec;
 var util = require("util");
-
-//console.log([].slice.call(arr,0));
-//console.log([].slice.call(new Uint32Array(arr2)));
-//console.log(arr2);
-//process.exit();
-
-var graphName = "dblp";
+var graphName = "subdblp";
 var graphFile = "./graphs/"+graphName+".txt";
 var diametersFile = "./graphs/"+graphName+"_diameters.txt";
 console.log("Loading graph: "+graphFile);
@@ -28,7 +40,6 @@ lib.fromFile(graphFile,lib.ArrayGraph,function(graph){
     var lastDone = 0;
     var startTime = Date.now();
     var stats = {};
-    //for (var node=1; node<=graph.size; ++node)
     for (var node=graph.size; node>=1; --node)
         if (diameters[node-1]!==-1) setDiameter(node,diameters[node-1]);
         else todo.push(node);
@@ -87,41 +98,31 @@ lib.fromFile(graphFile,lib.ArrayGraph,function(graph){
             id:clients.length,
             socket:socket,
             workload:[]};
-        //clients[client.id] = client;
         clients.push(client);
-
         setInterval(function(){ 
             socket.emit("stats",stats); 
         },2000);
-            
         socket.emit("graph",{
             size:graph.size, 
             arrays:arr_.buffer,
             sizes:sizes_.buffer});
-
         socket.on("results",function(results,size){
-            //console.log("RESULTS");
-            //console.log(client.workload.slice(0,10));
-            //console.log(results.slice(0,10));
             if (results.length > 0){
                 if (client.workload.length !== results.length)
                     throw "wtf" + client.workload.length + "," + results.length;
-                for (var i=0,l=results.length; i<l; ++i){
+                for (var i=0,l=results.length; i<l; ++i)
                     setDiameter(client.workload[i],results[i]);
-                };
             };
             if (size > 0){
                 client.workload = alloc(todo,size);
                 socket.emit("workload",client.workload);
             };
         });
-
         socket.on("disconnect",function(){
             [].push.apply(todo,client.workload);
             clients.splice(client.id,1);
         });
     });
-    //console.log(graph.size);
 });
 
 
