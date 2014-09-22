@@ -1,0 +1,617 @@
+<link rel="stylesheet" href="css/markdown6.css">
+<style>
+* { font-family: Helvetica, arial, freesans, clean, sans-serif; }
+body { vertical-align: middle; background-color: #DDDDDD; margin-top: 0px; margin-bottom: 0px; }
+.markdown-body {
+    min-width: 200px;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 10px 40px;
+    border-radius: 32px;
+    background-color: #FFFFFF;
+}
+td { text-align: center; }    
+#parentsDblp td { font-size: 10px; }
+h1, h2, h3, h4, h5 { width: 100%; text-align: center; }
+table { display: inline-block; margin-left: 50%; transform:translate(-50%,0); }
+</style>
+<head><meta charset="UTF-8"></head>
+<article class="markdown-body">
+<body>
+<h2>1º Trabalho de Grafos</h2>
+<h3>Patrícia de Andrade Kovaleski e Victor Hernandes Silva Maia</h3>
+<hr style="margin-top:0px; margin-bottom:0px"/>
+<h5>Linguagem utilizada para implementação da biblioteca de grafos: <strong>JavaScript</strong></h5>
+<p>Motivos dessa escolha: </p>
+<ul>
+<li>Performance satisfatória (mesma ordem de magnitude de C, graças a técnicas de JIT);</li>
+<li>Alto nível (<em>closures</em>, <em>first-class functions</em>);</li>
+<li>Praticidade obtidade por rodar no <em>browser</em>;</li>
+<li>Qualidade dos <em>package managers</em>, npm;</li>
+<li>Disponibilizadade de libs: amplamente utilizada no GitHub.</li>
+</ul>
+<hr style="padding-top: 0px; padding-bottom:0px; margin-top:0px; margin-bottom:0px"/>
+<h2 style="margin-top: 12px; margin-bottom:0px;">Estudos de Caso</h2>
+<h3>1º Caso: Memória utilizada</h3>
+<table>
+   <thead>
+      <tr>
+         <th></th>
+         <th>Matriz de Adjacência</th>
+         <th>Vetor de Adjacência</th>
+      </tr>
+   </thead>
+   <tbody>
+      <tr>
+         <td><strong>as_graph</strong></td>
+         <td>19.7 MB</td>
+         <td>16.9 MB</td>
+      </tr>
+      <tr>
+         <td><strong>subdblp</strong></td>
+         <td>279.7 MB</td>
+         <td>66.2 MB</td>
+      </tr>
+      <tr>
+         <td><strong>dblp</strong></td>
+         <td>---</td>
+         <td>392.9 MB</td>
+      </tr>
+   </tbody>
+</table>
+<p>Não foi possível criar a matriz de adjacência para o grafo dblp.txt no computador utilizado. Teoricamente seriam necessários aproximadamente 113.68GB para armazenar seus 1397510 vértices.</p>
+<p><strong>Implementação</strong></p>
+<p>Para a matriz de adjacência utilizamos apenas um bit por célula ao invés de um byte assim como utilizamos apenas metade da matriz por ela ser simétrica. Além disso, armezenamos os dados em um vetor dinâmico, o qual acessamos através de uma combinação da posição desejada da matriz. Essa implementação é <em>cache-friendly</em> e otimiza o acesso aos dados.</p>
+<h3>2º e 3º Casos: Tempo de execução de 10 BFSs/DFSs</h3>
+<table>
+   <thead>
+      <tr>
+         <th>BFS</th>
+         <th>Matriz de Adjacência</th>
+         <th>Vetor de Adjacência</th>
+         <th>DFS</th>
+         <th>Matriz de Adjacência</th>
+         <th>Vetor de Adjacência</th>
+      </tr>
+   </thead>
+   <tbody>
+      <tr>
+         <td><strong>as_graph</strong></td>
+         <td>435.28 s</td>
+         <td>0,01 s</td>
+         <td><strong>as_graph</strong></td>
+         <td>432.18 s</td>
+         <td>0.02 s</td>
+      </tr>
+      <tr>
+         <td><strong>subdblp</strong></td>
+         <td>1533,25 s</td>
+         <td>0.17 s</td>
+         <td><strong>subdblp</strong></td>
+         <td>14430,27 s</td>
+         <td>0.29 s</td>
+      </tr>
+      <tr>
+         <td><strong>dblp</strong></td>
+         <td>---</td>
+         <td>2.07 s</td>
+         <td><strong>dblp</strong></td>
+         <td>---</td>
+         <td>7.49 s</td>
+      </tr>
+   </tbody>
+</table>
+<p>Seria possível reduzir considerávelmente o tempo de execução matriz de adjacência utilizando um cache dos vizinhos de cada vértice da matriz; o que nada mais seria do que um vetor de adjacência. Acreditamos, porém, que isto acabaria com o propósito de comparação entre as estruturas. Preferimos, portanto, manter a versão não-otimizada. </p>
+<h3>4º Caso: Obtendo o pai dos vértices</h3>
+<table id="parents">
+   <tr>
+      <th></th>
+        <th>BFS (* VI/V = Vértice Inicial / Vértice)</th>
+        <th>DFS (* VI/V = Vértice Inicial / Vértice)</th>
+   </tr>
+   <tr>
+      <th>as_graph</th>
+      <td>
+         <table>
+            <thead>
+               <tr>
+                  <th>VI/V*</th>
+                  <th>10</th>
+                  <th>20</th>
+                  <th>30</th>
+                  <th>40</th>
+                  <th>50</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr>
+                  <td><strong>1</strong></td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>1</td>
+               </tr>
+               <tr>
+                  <td><strong>2</strong></td>
+                  <td>2</td>
+                  <td>10</td>
+                  <td>35</td>
+                  <td>2</td>
+                  <td>35</td>
+               </tr>
+               <tr>
+                  <td><strong>3</strong></td>
+                  <td>3</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>1</td>
+               </tr>
+               <tr>
+                  <td><strong>4</strong></td>
+                  <td>4</td>
+                  <td>10</td>
+                  <td>5573</td>
+                  <td>6458</td>
+                  <td>27</td>
+               </tr>
+               <tr>
+                  <td><strong>5</strong></td>
+                  <td>5</td>
+                  <td>5</td>
+                  <td>8</td>
+                  <td>2</td>
+                  <td>5</td>
+               </tr>
+            </tbody>
+         </table>
+      </td>
+      <td>
+         <table>
+            <thead>
+               <tr>
+                  <th>VI/V*</th>
+                  <th>10</th>
+                  <th>20</th>
+                  <th>30</th>
+                  <th>40</th>
+                  <th>50</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr>
+                  <td><strong>1</strong></td>
+                  <td>3</td>
+                  <td>3606</td>
+                  <td>1945</td>
+                  <td>9722</td>
+                  <td>102</td>
+               </tr>
+               <tr>
+                  <td><strong>2</strong></td>
+                  <td>3</td>
+                  <td>247</td>
+                  <td>1258</td>
+                  <td>9722</td>
+                  <td>102</td>
+               </tr>
+               <tr>
+                  <td><strong>3</strong></td>
+                  <td>6</td>
+                  <td>37</td>
+                  <td>1258</td>
+                  <td>2293</td>
+                  <td>2693</td>
+               </tr>
+               <tr>
+                  <td><strong>4</strong></td>
+                  <td>4</td>
+                  <td>44</td>
+                  <td>1258</td>
+                  <td>9722</td>
+                  <td>102</td>
+               </tr>
+               <tr>
+                  <td><strong>5</strong></td>
+                  <td>3</td>
+                  <td>37</td>
+                  <td>1258</td>
+                  <td>2293</td>
+                  <td>2693</td>
+               </tr>
+            </tbody>
+         </table>
+      </td>
+   </tr>
+   <tr>
+      <th>subdblp</th>
+      <td>
+         <table>
+            <thead>
+               <tr>
+                  <th>VI/V*</th>
+                  <th>10</th>
+                  <th>20</th>
+                  <th>30</th>
+                  <th>40</th>
+                  <th>50</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr>
+                  <td><strong>1</strong></td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>2</td>
+                  <td>2</td>
+               </tr>
+               <tr>
+                  <td><strong>2</strong></td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>2</td>
+                  <td>2</td>
+               </tr>
+               <tr>
+                  <td><strong>3</strong></td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>2</td>
+                  <td>2</td>
+               </tr>
+               <tr>
+                  <td><strong>4</strong></td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>2</td>
+                  <td>2</td>
+               </tr>
+               <tr>
+                  <td><strong>5</strong></td>
+                  <td>5</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>2</td>
+                  <td>2</td>
+               </tr>
+            </tbody>
+         </table>
+      </td>
+      <td>
+         <table>
+            <thead>
+               <tr>
+                  <th>VI/V*</th>
+                  <th>10</th>
+                  <th>20</th>
+                  <th>30</th>
+                  <th>40</th>
+                  <th>50</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr>
+                  <td><strong>1</strong></td>
+                  <td>428</td>
+                  <td>914</td>
+                  <td>1102</td>
+                  <td>1643</td>
+                  <td>21</td>
+               </tr>
+               <tr>
+                  <td><strong>2</strong></td>
+                  <td>428</td>
+                  <td>914</td>
+                  <td>1102</td>
+                  <td>1643</td>
+                  <td>21</td>
+               </tr>
+               <tr>
+                  <td><strong>3</strong></td>
+                  <td>428</td>
+                  <td>914</td>
+                  <td>1095</td>
+                  <td>1643</td>
+                  <td>21</td>
+               </tr>
+               <tr>
+                  <td><strong>4</strong></td>
+                  <td>428</td>
+                  <td>914</td>
+                  <td>1095</td>
+                  <td>1643</td>
+                  <td>21</td>
+               </tr>
+               <tr>
+                  <td><strong>5</strong></td>
+                  <td>428</td>
+                  <td>917</td>
+                  <td>1102</td>
+                  <td>1643</td>
+                  <td>21</td>
+               </tr>
+            </tbody>
+         </table>
+      </td>
+   </tr>
+   <tr id="parentsDblp">
+      <th>dblp</th>
+      <td>
+         <table>
+            <thead>
+               <tr>
+                  <th>VI/V*</th>
+                  <th>10</th>
+                  <th>20</th>
+                  <th>30</th>
+                  <th>40</th>
+                  <th>50</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr>
+                  <td><strong>1</strong></td>
+                  <td>1226753</td>
+                  <td>843078</td>
+                  <td>80251</td>
+                  <td>1039901</td>
+                  <td>291354</td>
+               </tr>
+               <tr>
+                  <td><strong>2</strong></td>
+                  <td>1226753</td>
+                  <td>843078</td>
+                  <td>367956</td>
+                  <td>1009777</td>
+                  <td>766662</td>
+               </tr>
+               <tr>
+                  <td><strong>3</strong></td>
+                  <td>1226753</td>
+                  <td>843078</td>
+                  <td>367956</td>
+                  <td>1009777</td>
+                  <td>766662</td>
+               </tr>
+               <tr>
+                  <td><strong>4</strong></td>
+                  <td>1226753</td>
+                  <td>843078</td>
+                  <td>367956</td>
+                  <td>1009777</td>
+                  <td>766662</td>
+               </tr>
+               <tr>
+                  <td><strong>5</strong></td>
+                  <td>1226753</td>
+                  <td>843078</td>
+                  <td>367956</td>
+                  <td>1009777</td>
+                  <td>766662</td>
+               </tr>
+            </tbody>
+         </table>
+      </td>
+      <td>
+         <table>
+            <thead>
+               <tr>
+                  <th>VI/V*</th>
+                  <th>10</th>
+                  <th>20</th>
+                  <th>30</th>
+                  <th>40</th>
+                  <th>50</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr>
+                  <td><strong>1</strong></td>
+                  <td>1226753</td>
+                  <td>843078</td>
+                  <td>80251</td>
+                  <td>325983</td>
+                  <td>291354</td>
+               </tr>
+               <tr>
+                  <td><strong>2</strong></td>
+                  <td>1226753</td>
+                  <td>762595</td>
+                  <td>80251</td>
+                  <td>325983</td>
+                  <td>291354</td>
+               </tr>
+               <tr>
+                  <td><strong>3</strong></td>
+                  <td>1226753</td>
+                  <td>762595</td>
+                  <td>80251</td>
+                  <td>325983</td>
+                  <td>291354</td>
+               </tr>
+               <tr>
+                  <td><strong>4</strong></td>
+                  <td>1226753</td>
+                  <td>762595</td>
+                  <td>80251</td>
+                  <td>325983</td>
+                  <td>291354</td>
+               </tr>
+               <tr>
+                  <td><strong>5</strong></td>
+                  <td>1226753</td>
+                  <td>762595</td>
+                  <td>80251</td>
+                  <td>325983</td>
+                  <td>291354</td>
+               </tr>
+            </tbody>
+         </table>
+      </td>
+   </tr>
+</table>
+<br/>
+<p><strong>Implementação</strong></p>
+<p>Tanto o pai quanto o grau de cada vértice é obtido ao rodarmos uma BFS. Os valores são atualizados em um array referente ao grafo em questão.</p>
+<h3>5º Caso: Componentes conexas</h3>
+<table>
+   <tr>
+      <th></th>
+      <th>as_graph</th>
+      <th>subdblp</th>
+      <th>dblp</th>
+   </tr>
+   <tr>
+      <th style="white-space:nowrap">Total de componentes conexas:</th>
+      <td>1</td>
+      <td>10</td>
+      <td>116442</td>
+   </tr>
+   <tr>
+      <th style="white-space:nowrap">Maior componente conexa:</th>
+      <td>32385</td>
+      <td>100001</td>
+      <td>1183247</td>
+   </tr>
+   <tr>
+      <th style="white-space:nowrap">Menor componente conexa:</th>
+      <td>32385</td>
+      <td>2</td>
+      <td>1</td>
+   </tr>
+</table>
+<p><strong>Implementação</strong></p>
+<p>Para otimizarmos a escolha do <em>&#39;proximo vértice não marcado&#39;</em> utilizamos dois vetores. Ao rodarmos a BFS um vetor é preenchido com o <em>último vértice não marcado</em> e outro com o <em>próximo vértice não marcado</em> de cada vértice visitado. Ao final de cada BFS obtemos o <em>&#39;próximo vértice não marcado&#39;</em> apenas manipulando vetores, que são eficientes para acesso aleatório.</p>
+<h3>6º Caso: Grau dos vértices</h3>
+<table>
+   <tr>
+      <th>Grafo</th>
+      <th>Menor grau</th>
+      <th>Maior grau</th>
+      <th>Gráfico</th>
+   </tr>
+   <tr>
+      <th>as_graph</th>
+      <td>1</td>
+      <td>2161</td>
+      <td><img width="500px" src="charts/dist_as_graph.png"/></td>
+   </tr>
+   <tr>
+      <th>subdblp</th>
+      <td>1</td>
+      <td>1035</td>
+      <td><img width="500px" src="charts/dist_subdblp.png"/></td>
+   </tr>
+   <tr>
+      <th>dblp</th>
+      <td>0</td>
+      <td>1638</td>
+      <td><img width="500px" src="charts/dist_dblp.png"/></td>
+   </tr>
+</table>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<h3>7º Caso: Diâmetro do grafo</h3>
+<table>
+   <tr>
+      <th>Grafo</th>
+      <th>Diâmetro</th>
+      <th>Tempo de Execução *</th>
+      <th>Gráfico</th>
+   </tr>
+   <tr>
+      <th>as_graph</th>
+      <td>11</td>
+      <td>8s</td>
+      <td><img width="500px" src="charts/diameter_as_graph.png"/></td>
+   </tr>
+   <tr>
+      <th>subdblp</th>
+      <td>7</td>
+      <td>5m 10s</td>
+      <td><img width="500px" src="charts/diameter_subdblp.png"/></td>
+   </tr>
+   <tr>
+      <th>dblp</th>
+      <td>24</td>
+      <td>9h</td>
+      <td><img width="500px" src="charts/diameter_dblp.png"/></td>
+   </tr>
+</table>
+<p>* Tempo de execução medido utilizando o computador de diâmetro distribuído implementado para este trabalho. Se fossem utilizadas as versões single-core, o tempo seria maior.</p>
+<p><strong>Implementação</strong></p>
+<p>Esse algoritmo possui complexidade O(n^2) e, portanto, sua execução se torna impraticável conforme o número de vértices aumenta. Calculamos que o tempo necessário para obter o diâmetro do grafo de 1.4kk vértices seria de, aproximadamente, 2 dias utilizando a máquina disponível. Para agilizar este processamento, implementamos uma arquitetura de computação distribuída.</p>
+<p>Neste sistema, uma máquina mestra é encarregada de distribuir o trabalho entre várias máquinas trabalhadoras. Um servidor HTTP/TCP é utilizado para comunicação e, como o código está em JavaScript, para que um computador entre na rede, basta acessar o um site utilizando qualquer navegador, não sendo, portanto, necessária a instalação de qualquer tipo de software nas máquinas trabalhadoras.</p>
+<p>Utilizando esse sistema com 4 computadores, com um total de 10 núcleos de processamento, o tempo pôde ser reduzido a cerca de 6 horas.</p>
+<hr/>
+<p style="text-align:center">
+    <strong>Código:</strong>
+    <a href="http://github.com/viclib/grafo">http://github.com/viclib/grafo</a>
+</p>
+<hr />
+<div style="text-align:right">
+   <p>Universidade Federal do Rio de Janeiro - UFRJ</p>
+   <p>Teoria dos Grafos</p>
+   <p>2014/2</p>
+</div>
+</article>
+</body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
