@@ -22,6 +22,9 @@ SymmetricBitMatrix.prototype.set = function(x,y){
     return this.buffer[~~(bitPos/8)] = this.buffer[~~(bitPos/8)] | (1 << (7 - (bitPos & 7)));
 };
 
+// Implementar:
+// Matriz não binária
+
 // This is the main Graph class. It implements the common interface of a graph,
 // including most of the functions used in the library, such as BFS and DFS. 
 function Graph(n){
@@ -166,21 +169,29 @@ Graph.prototype.connected = function(){
 // ArrayGraph is an implementation of Graph using an adjacency dynamic array.
 function ArrayGraph(n,params){
     Graph.call(this,n);
-    params     = params || {};
-    this.size  = n;
-    this.array = params.array || new Array(n);
-    if (!params.array)
-        for (var i=0; i<n; ++i)
-            this.array[i] = [];
+    params      = params || {};
+    this.size   = n;
+    this.neighbors_ = params.neighbors_ || new Array(n);
+    this.weights_   = params.weights_ || new Array(n);
+    if (!params.neighbors_)
+        for (var i=0; i<n; ++i){
+            this.neighbors_[i]  = [];
+            this.weights_[i] = [];
+        };
     this.className = "ArrayGraph";
 };
 ArrayGraph.prototype = new Graph(0);
-ArrayGraph.prototype.addEdge = function(x,y){
-    this.array[x-1].push(y);
-    this.array[y-1].push(x);
+ArrayGraph.prototype.addEdge = function(x,y,w){
+    this.neighbors_[x-1].push(y);
+    this.neighbors_[y-1].push(x);
+    this.weights_[x-1].push(w);
+    this.weights_[y-1].push(w);
 };
 ArrayGraph.prototype.neighbors = function(n){
-    return this.array[n-1];
+    return this.neighbors_[n-1];
+};
+ArrayGraph.prototype.weights = function(n){
+    return this.weights_[n-1];
 };
 
 // MatrixGraph is an implementation of Graph using an adjacency matrix.
