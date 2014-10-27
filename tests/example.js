@@ -6,7 +6,7 @@ if (typeof window === "undefined")
 // neighbors using a dynamic array. You could also use MatrixGraph, which
 // represents neighbors using an optimised symetrical bit matrix. Nodes are
 // represented numerically, from n=1 to n=18.
-var graph = new lib.ArrayGraph(18);
+var graph = new lib.MatrixGraph(18);
 
 // adds edges between nodes
 graph.addEdge(1,2);

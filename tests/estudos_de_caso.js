@@ -9,7 +9,7 @@ var usedMem = (function(){
 })();
 
 var usableClasses = [lib.ArrayGraph, lib.MatrixGraph];
-var graphNames    = ["as_graph","subdblp","dblp","simples"];
+var graphNames    = ["as_graph","subdblp","dblp","simples","simples2"];
 var usedClass     = usableClasses[0];
 var graphName     = graphNames[0];
 var graphPath     = "./../graphs/"+graphName+".txt";
@@ -19,6 +19,18 @@ lib.fromFile(graphPath,usedClass,function(graph){
     console.log("Class: "+graph.className);
     console.log("GSize: "+graph.size+" nodes");
     console.log("Memory usage: "+(usedMem()/(1024*1024))+" MBs");
+
+    var fs = require("fs");
+    var rng = function(a,b){ for (var r=[],i=a;i<b;++i)r.push(i); return r; };
+    var str = ("["+rng(1,graph.size+1).map(function(node){
+        return "["+graph.neighbors(node).map(function(a){return "("+a+",1)"})+"]";
+    }).join(",")+"]");
+    fs.writeFileSync("tmp",str);
+
+    //for (var str="", i=1; i<=graph.size; ++i)
+        //str += "["+graph.neighbors(i).map(f)+"],";
+    //console.log("["+str+"]");
+
 
     //var conexos = graph.conexo();
     //console.log("Componentes conexos: ",conexos.length);

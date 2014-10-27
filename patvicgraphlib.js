@@ -56,6 +56,7 @@ Graph.prototype.bfs = function(n,dontClear){
     this.connecteds.push(connecteds);
     for (var index = 0; index < stack.length; ++index){
         var node  = stack[index];
+        console.log(node);
         var neigs = this.neighbors(node);
         for (var i = 0, l = neigs.length; i<l; ++i){
             var neig = neigs[i];
@@ -74,9 +75,11 @@ Graph.prototype.dfs = function(n){
     this.parent[n-1] = 0;
     this.level[n-1]  = 0;
     while(stack.length > 0){
-        var node = stack.pop()
+        var node = stack.pop();
         if (!this.marked[node-1]){
+            console.log(node);
             var neigs = this.neighbors(node);
+            console.log("->",node,neigs);
             this.marked[node-1] = 1;
             for (var i=neigs.length-1; i>=0; --i){
                 var neig = neigs[i];
@@ -86,6 +89,7 @@ Graph.prototype.dfs = function(n){
                     stack.push(neig);
                 };
             };
+            console.log(stack);
         };
     };
 };
