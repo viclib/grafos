@@ -34,7 +34,7 @@ function Graph(n){
     this.stack         = new Uint32Array(1500000); // porque sim @.@ me processa
     this.prevUnmarked  = new Uint32Array(n);
     this.nextUnmarked  = new Uint32Array(n);
-    this.distance      = new Uint32Array(n);
+    this.distance      = new Float64Array(n);
     this.firstUnmarked = 1;
     this.connecteds    = [];
     for (var i=1; i<=n; ++i)
@@ -145,29 +145,37 @@ Graph.prototype.diameter = function(){
     return {diameter: maxLevel, startNode: node};
 };
 Graph.prototype.dijkstra = function(n){
+    this.clearState();
     for (var i = 1; i <= this.size; ++i)
         this.distance[i-1] = Infinity;
-    this.distance[n] = 0;
-    this.marked[n] = 1;
-    var count = 0;
-    while(count<this.size){
-        //pegar o vertice u de menor distancia!!!!
-        var u = 1;
-        for (var i=2; i<=this.size; ++i)
-            if (this.distance[i-1] < this.distance[u-1])
+    this.distance[0] = 0;
+    var count = 1;
+    while (count < this.size){
+        for (var u=0, i=1; i<=this.size; ++i)
+            if (!this.marked[i-1] && (!u || this.distance[i-1] < this.distance[u-1]))
                 u = i;
-        this.marked[u] = 1;
+        this.marked[u-1] = 1;
         ++count;
         var neigs = this.neighbors(u);
         var weigs = this.weights(u);
-        for (var i = neigs.length - 1; i>=0; --i) {
+        for (var i = 0, l=neigs.length; i<l; ++i){
             var neig = neigs[i];
-            if (this.distance[neig] > this.distance[u] + weigs[neig])
-                this.distance[neig] = this.distance[u] + weigs[neig];
+            var weig = weigs[i];
+            if (this.distance[neig-1] > this.distance[u-1] + weig)
+                this.distance[neig-1] = this.distance[u-1] + weig;
         };
     };
 };
 
+        //console.log("all neigs = "+JSON.stringify([].slice.call(this.neighbors_)));
+        //console.log("u = "+u);
+    //console.log("rodando dijkstra");
+        //console.log("count = "+count);
+        //console.log("u = "+u);
+        //console.log("neigs of "+u+": "+JSON.stringify(neigs));
+            //console.log("->",[].slice.call(this.distance,0));
+            //console.log({neig:neig, u:u});
+            //console.log(this.distance[neig-1] + ">" + this.distance[u-1] + "+" + weigs[i]);
 
 Graph.prototype.output = function(){
     var dist = [];
@@ -202,6 +210,7 @@ function ArrayGraph(n,params){
     if (!params.neighbors_)
         for (var i=0; i<n; ++i){
             this.neighbors_[i]  = [];
+            console.log(i);
             this.weights_[i] = [];
         };
     this.className = "ArrayGraph";
@@ -248,15 +257,11 @@ var loadGraphFromFile = function(file,GraphClass,callback){
     fileStream.on("data",function(chunk){
         var newLineIndex;
         file = file + chunk;
-        while ((newLineIndex = file.indexOf("\n")) !== -1){
+        while ((newLineIndex = file.indexOf("\n")) > 0){
             if (!graph)
                 graph = new GraphClass(Number(file.slice(0,newLineIndex)));
-            else {
-                var spaceIndex = file.indexOf(" ");
-                graph.addEdge(
-                    Number(file.slice(0,spaceIndex)),
-                    Number(file.slice(spaceIndex+1,newLineIndex)));
-            };
+            else 
+                graph.addEdge.apply(graph,file.slice(0,newLineIndex).split(" ").map(Number));
             file = file.slice(newLineIndex+1);
         };
     });
