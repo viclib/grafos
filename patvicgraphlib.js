@@ -34,6 +34,7 @@ function Graph(n){
     this.stack         = new Uint32Array(1500000); // porque sim @.@ me processa
     this.prevUnmarked  = new Uint32Array(n);
     this.nextUnmarked  = new Uint32Array(n);
+    this.distance      = new Uint32Array(n);
     this.firstUnmarked = 1;
     this.connecteds    = [];
     for (var i=1; i<=n; ++i)
@@ -143,6 +144,31 @@ Graph.prototype.diameter = function(){
     };
     return {diameter: maxLevel, startNode: node};
 };
+Graph.prototype.dijkstra = function(n){
+    for (var i = 1; i <= this.size; ++i)
+        this.distance[i-1] = Infinity;
+    this.distance[n] = 0;
+    this.marked[n] = 1;
+    var count = 0;
+    while(count<this.size){
+        //pegar o vertice u de menor distancia!!!!
+        var u = 1;
+        for (var i=2; i<=this.size; ++i)
+            if (this.distance[i-1] < this.distance[u-1])
+                u = i;
+        this.marked[u] = 1;
+        ++count;
+        var neigs = this.neighbors(u);
+        var weigs = this.weights(u);
+        for (var i = neigs.length - 1; i>=0; --i) {
+            var neig = neigs[i];
+            if (this.distance[neig] > this.distance[u] + weigs[neig])
+                this.distance[neig] = this.distance[u] + weigs[neig];
+        };
+    };
+};
+
+
 Graph.prototype.output = function(){
     var dist = [];
     for (var i=1; i<=this.size; ++i){
