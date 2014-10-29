@@ -196,6 +196,14 @@ Graph.prototype.dijkstra = function(n){
         };
     };
 };
+Graph.prototype.safeCallDijkstra = function(n){
+    if (!this.hasWeights) 
+        bfs(n);
+    else if (!this.hasNegativeWeights) 
+        dijkstra(n);
+    else
+        throw("Grafo com pesos negativos.")
+};
 Graph.prototype.output = function(){
     var dist = [];
     for (var i=1; i<=this.size; ++i){
