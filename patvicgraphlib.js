@@ -22,8 +22,27 @@ SymmetricBitMatrix.prototype.set = function(x,y){
     return this.buffer[~~(bitPos/8)] = this.buffer[~~(bitPos/8)] | (1 << (7 - (bitPos & 7)));
 };
 
-// Implementar:
-// Matriz não binária
+// An usual 2D matrix of doubles.
+function Matrix(w,h){
+    this.w      = w;
+    this.h      = w;
+    this.buffer = new Float64Array(w*h);
+};
+Matrix.prototype.get = function(x,y){
+    return this.buffer[x+y*this.w];
+};
+Matrix.prototype.set = function(x,y,z){
+    return this.buffer[x+y*this.w] = z;
+};
+Matrix.prototype.show = function(){
+    var str = "";
+    for (var j=0; j<this.w; ++j){
+        for (var i=0; i<this.w; ++i)
+            str += this.get(i,j) + "\t";
+        str += "\n";
+    };
+    return str;
+};
 
 // This is the main Graph class. It implements the common interface of a graph,
 // including most of the functions used in the library, such as BFS and DFS. 
@@ -60,7 +79,6 @@ Graph.prototype.bfs = function(n,dontClear){
     this.connecteds.push(connecteds);
     for (var index = 0; index < stack.length; ++index){
         var node  = stack[index];
-        console.log(node);
         var neigs = this.neighbors(node);
         for (var i = 0, l = neigs.length; i<l; ++i){
             var neig = neigs[i];
@@ -144,39 +162,40 @@ Graph.prototype.diameter = function(){
     };
     return {diameter: maxLevel, startNode: node};
 };
+Graph.prototype.smallestPath = function(node){
+    // Returns smallest path from `node` to the node you called dijkstra with.
+    // Only works immediatly after disjkstra!
+    return (function go(node,result){
+        return this.parent[node-1] === 0 
+            ? result.concat(node)
+            : go.call(this,this.parent[node-1],result.concat(node));
+    }).call(this,node,[]);
+};
 Graph.prototype.dijkstra = function(n){
     this.clearState();
     for (var i = 1; i <= this.size; ++i)
         this.distance[i-1] = Infinity;
-    this.distance[0] = 0;
-    var count = 1;
+    this.distance[n-1] = 0;
+    this.parent[n-1]   = 0;
+    var count          = 1;
     while (count < this.size){
-        for (var u=0, i=1; i<=this.size; ++i)
-            if (!this.marked[i-1] && (!u || this.distance[i-1] < this.distance[u-1]))
-                u = i;
-        this.marked[u-1] = 1;
+        for (var node=0, i=1; i<=this.size; ++i)
+            if (!this.marked[i-1] && (!node || this.distance[i-1] < this.distance[node-1]))
+                node = i;
+        this.marked[node-1] = 1;
         ++count;
-        var neigs = this.neighbors(u);
-        var weigs = this.weights(u);
+        var neigs = this.neighbors(node);
+        var weigs = this.weights(node);
         for (var i = 0, l=neigs.length; i<l; ++i){
             var neig = neigs[i];
             var weig = weigs[i];
-            if (this.distance[neig-1] > this.distance[u-1] + weig)
-                this.distance[neig-1] = this.distance[u-1] + weig;
+            if (this.distance[neig-1] > this.distance[node-1] + weig){
+                this.distance[neig-1] = this.distance[node-1] + weig;
+                this.parent[neig-1]   = node;
+            };
         };
     };
 };
-
-        //console.log("all neigs = "+JSON.stringify([].slice.call(this.neighbors_)));
-        //console.log("u = "+u);
-    //console.log("rodando dijkstra");
-        //console.log("count = "+count);
-        //console.log("u = "+u);
-        //console.log("neigs of "+u+": "+JSON.stringify(neigs));
-            //console.log("->",[].slice.call(this.distance,0));
-            //console.log({neig:neig, u:u});
-            //console.log(this.distance[neig-1] + ">" + this.distance[u-1] + "+" + weigs[i]);
-
 Graph.prototype.output = function(){
     var dist = [];
     for (var i=1; i<=this.size; ++i){
@@ -210,7 +229,6 @@ function ArrayGraph(n,params){
     if (!params.neighbors_)
         for (var i=0; i<n; ++i){
             this.neighbors_[i]  = [];
-            console.log(i);
             this.weights_[i] = [];
         };
     this.className = "ArrayGraph";
@@ -271,7 +289,9 @@ var loadGraphFromFile = function(file,GraphClass,callback){
 };
 
 if (typeof module !== "undefined") module.exports = {
-    fromFile    : loadGraphFromFile,
-    ArrayGraph  : ArrayGraph,
-    MatrixGraph : MatrixGraph};
+    fromFile           : loadGraphFromFile,
+    ArrayGraph         : ArrayGraph,
+    MatrixGraph        : MatrixGraph,
+    Matrix             : Matrix,
+    SymmetricBitMatrix : SymmetricBitMatrix};
 

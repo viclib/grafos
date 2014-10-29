@@ -20,8 +20,14 @@ lib.fromFile(graphPath,usedClass,function(graph){
     console.log("Memory usage: "+(usedMem()/(1024*1024))+" MBs");
 
 
+    var toChar = function(i){ return String.fromCharCode("a".charCodeAt(0)+i-1); };
+
     graph.dijkstra(1);
     console.log([].slice.call(graph.distance,0));
+    console.log(graph.smallestPath(7).map(toChar));
+
+    //console.log(mat.show());
+    //console.log(mat.get(1,1));
 
     //var fs = require("fs");
     //var rng = function(a,b){ for (var r=[],i=a;i<b;++i)r.push(i); return r; };
