@@ -53,7 +53,7 @@ function Graph(n){
     this.stack              = new Uint32Array(1500000); // porque sim @.@ me processa
     this.prevUnmarked       = new Uint32Array(n);
     this.nextUnmarked       = new Uint32Array(n);
-    this.heuristic          = new Float64Array(n);
+    this.distance          = new Float64Array(n);
     this.firstUnmarked      = 1;
     this.connecteds         = [];
     this.hasWeights         = false;
@@ -174,17 +174,17 @@ Graph.prototype.smallestPath = function(node){
     }).call(this,node,[]);
 };
 Graph.prototype.walk = function(visit){
-    // Walks through a graph, visiting the nodes, ordered by an heuristic.
+    // Walks through a graph, visiting the nodes, ordered by an distance.
     return function(n){
         this.clearState();
         for (var i = 1; i <= this.size; ++i)
-            this.heuristic[i-1] = Infinity;
-        this.heuristic[n-1] = 0;
+            this.distance[i-1] = Infinity;
+        this.distance[n-1] = 0;
         this.parent[n-1]    = 0;
         var count           = 1;
         while (count < this.size){
             for (var node=0, i=1; i<=this.size; ++i)
-                if (!this.marked[i-1] && (!node || this.heuristic[i-1] < this.heuristic[node-1]))
+                if (!this.marked[i-1] && (!node || this.distance[i-1] < this.distance[node-1]))
                     node = i;
             this.marked[node-1] = 1;
             ++count;
@@ -196,14 +196,14 @@ Graph.prototype.walk = function(visit){
     };
 };
 Graph.prototype.dijkstra = Graph.prototype.walk(function(node,neig,weig){
-    if (this.heuristic[neig-1] > this.heuristic[node-1] + weig){
-        this.heuristic[neig-1] = this.heuristic[node-1] + weig;
+    if (this.distance[neig-1] > this.distance[node-1] + weig){
+        this.distance[neig-1] = this.distance[node-1] + weig;
         this.parent[neig-1]    = node;
     };
 });
 Graph.prototype.prim = Graph.prototype.walk(function(node,neig,weig){
-    if (this.heuristic[neig-1] > weig){
-        this.heuristic[neig-1] = weig;
+    if (this.distance[neig-1] > weig){
+        this.distance[neig-1] = weig;
         this.parent[neig-1]    = node;
     };
 });
