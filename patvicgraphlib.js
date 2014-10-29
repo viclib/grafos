@@ -207,6 +207,14 @@ Graph.prototype.prim = Graph.prototype.walk(function(node,neig,weig){
         this.parent[neig-1]    = node;
     };
 });
+Graph.prototype.safeCallDijkstra = function(n){
+    if (!this.hasWeights) 
+        bfs(n);
+    else if (!this.hasNegativeWeights) 
+        dijkstra(n);
+    else
+        throw("Grafo com pesos negativos.")
+};
 Graph.prototype.output = function(){
     var dist = [];
     for (var i=1; i<=this.size; ++i){
