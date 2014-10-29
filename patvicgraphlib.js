@@ -47,15 +47,17 @@ Matrix.prototype.show = function(){
 // This is the main Graph class. It implements the common interface of a graph,
 // including most of the functions used in the library, such as BFS and DFS. 
 function Graph(n){
-    this.parent        = new Uint32Array(n);
-    this.level         = new Uint8Array(n);
-    this.marked        = new Uint8Array(n);
-    this.stack         = new Uint32Array(1500000); // porque sim @.@ me processa
-    this.prevUnmarked  = new Uint32Array(n);
-    this.nextUnmarked  = new Uint32Array(n);
-    this.distance      = new Float64Array(n);
-    this.firstUnmarked = 1;
-    this.connecteds    = [];
+    this.parent             = new Uint32Array(n);
+    this.level              = new Uint8Array(n);
+    this.marked             = new Uint8Array(n);
+    this.stack              = new Uint32Array(1500000); // porque sim @.@ me processa
+    this.prevUnmarked       = new Uint32Array(n);
+    this.nextUnmarked       = new Uint32Array(n);
+    this.heuristic          = new Float64Array(n);
+    this.firstUnmarked      = 1;
+    this.connecteds         = [];
+    this.hasWeights         = false;
+    this.hasNegativeWeights = false;
     for (var i=1; i<=n; ++i)
         this.marked[i-1] = 0;
 };
@@ -171,31 +173,40 @@ Graph.prototype.smallestPath = function(node){
             : go.call(this,this.parent[node-1],result.concat(node));
     }).call(this,node,[]);
 };
-Graph.prototype.dijkstra = function(n){
-    this.clearState();
-    for (var i = 1; i <= this.size; ++i)
-        this.distance[i-1] = Infinity;
-    this.distance[n-1] = 0;
-    this.parent[n-1]   = 0;
-    var count          = 1;
-    while (count < this.size){
-        for (var node=0, i=1; i<=this.size; ++i)
-            if (!this.marked[i-1] && (!node || this.distance[i-1] < this.distance[node-1]))
-                node = i;
-        this.marked[node-1] = 1;
-        ++count;
-        var neigs = this.neighbors(node);
-        var weigs = this.weights(node);
-        for (var i = 0, l=neigs.length; i<l; ++i){
-            var neig = neigs[i];
-            var weig = weigs[i];
-            if (this.distance[neig-1] > this.distance[node-1] + weig){
-                this.distance[neig-1] = this.distance[node-1] + weig;
-                this.parent[neig-1]   = node;
-            };
+Graph.prototype.walk = function(visit){
+    // Walks through a graph, visiting the nodes, ordered by an heuristic.
+    return function(n){
+        this.clearState();
+        for (var i = 1; i <= this.size; ++i)
+            this.heuristic[i-1] = Infinity;
+        this.heuristic[n-1] = 0;
+        this.parent[n-1]    = 0;
+        var count           = 1;
+        while (count < this.size){
+            for (var node=0, i=1; i<=this.size; ++i)
+                if (!this.marked[i-1] && (!node || this.heuristic[i-1] < this.heuristic[node-1]))
+                    node = i;
+            this.marked[node-1] = 1;
+            ++count;
+            var neighbors = this.neighbors(node);
+            var weigths = this.weights(node);
+            for (var i=0, l=neighbors.length; i<l; ++i)
+                visit.call(this,node,neighbors[i],weigths[i]);
         };
     };
 };
+Graph.prototype.dijkstra = Graph.prototype.walk(function(node,neig,weig){
+    if (this.heuristic[neig-1] > this.heuristic[node-1] + weig){
+        this.heuristic[neig-1] = this.heuristic[node-1] + weig;
+        this.parent[neig-1]    = node;
+    };
+});
+Graph.prototype.prim = Graph.prototype.walk(function(node,neig,weig){
+    if (this.heuristic[neig-1] > weig){
+        this.heuristic[neig-1] = weig;
+        this.parent[neig-1]    = node;
+    };
+});
 Graph.prototype.output = function(){
     var dist = [];
     for (var i=1; i<=this.size; ++i){
@@ -237,8 +248,12 @@ ArrayGraph.prototype = new Graph(0);
 ArrayGraph.prototype.addEdge = function(x,y,w){
     this.neighbors_[x-1].push(y);
     this.neighbors_[y-1].push(x);
-    this.weights_[x-1].push(w);
-    this.weights_[y-1].push(w);
+    if (w !== undefined){
+        this.hasWeights = true;
+        if (w<0) this.hasNegativeWeights = true; // I absolutely hate this line.
+        this.weights_[x-1].push(w);
+        this.weights_[y-1].push(w);
+    };
 };
 ArrayGraph.prototype.neighbors = function(n){
     return this.neighbors_[n-1];

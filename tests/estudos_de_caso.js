@@ -23,7 +23,7 @@ lib.fromFile(graphPath,usedClass,function(graph){
     var toChar = function(i){ return String.fromCharCode("a".charCodeAt(0)+i-1); };
 
     graph.dijkstra(1);
-    console.log([].slice.call(graph.distance,0));
+    console.log([].slice.call(graph.heuristic,0));
     console.log(graph.smallestPath(7).map(toChar));
 
     //console.log(mat.show());
