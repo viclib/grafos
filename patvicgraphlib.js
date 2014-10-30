@@ -168,6 +168,7 @@ Graph.prototype.smallestPath = function(node){
     // Returns smallest path from `node` to the node you called dijkstra with.
     // Only works immediatly after disjkstra!
     return (function go(node,result){
+        console.log(node,result);
         return this.parent[node-1] === 0 
             ? result.concat(node)
             : go.call(this,this.parent[node-1],result.concat(node));
@@ -188,23 +189,25 @@ Graph.prototype.walk = function(visit){
                     node = i;
             this.marked[node-1] = 1;
             ++count;
+            console.log(count);
             var neighbors = this.neighbors(node);
             var weigths = this.weights(node);
             for (var i=0, l=neighbors.length; i<l; ++i)
-                visit.call(this,node,neighbors[i],weigths[i]);
+                if (!this.marked[neighbors[i]-1])
+                    visit.call(this,node,neighbors[i],weigths[i]);
         };
     };
 };
 Graph.prototype.dijkstra = Graph.prototype.walk(function(node,neig,weig){
     if (this.distance[neig-1] > this.distance[node-1] + weig){
         this.distance[neig-1] = this.distance[node-1] + weig;
-        this.parent[neig-1]    = node;
+        this.parent[neig-1]   = node;
     };
 });
 Graph.prototype.prim = Graph.prototype.walk(function(node,neig,weig){
     if (this.distance[neig-1] > weig){
         this.distance[neig-1] = weig;
-        this.parent[neig-1]    = node;
+        this.parent[neig-1]   = node;
     };
 });
 Graph.prototype.safeCallDijkstra = function(n){
