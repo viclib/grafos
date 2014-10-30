@@ -101,9 +101,7 @@ Graph.prototype.dfs = function(n){
     while(stack.length > 0){
         var node = stack.pop();
         if (!this.marked[node-1]){
-            console.log(node);
             var neigs = this.neighbors(node);
-            console.log("->",node,neigs);
             this.marked[node-1] = 1;
             for (var i=neigs.length-1; i>=0; --i){
                 var neig = neigs[i];
@@ -113,7 +111,6 @@ Graph.prototype.dfs = function(n){
                     stack.push(neig);
                 };
             };
-            console.log(stack);
         };
     };
 };
@@ -189,7 +186,6 @@ Graph.prototype.walk = function(visit){
                     node = i;
             this.marked[node-1] = 1;
             ++count;
-            console.log(count);
             var neighbors = this.neighbors(node);
             var weigths = this.weights(node);
             for (var i=0, l=neighbors.length; i<l; ++i)
