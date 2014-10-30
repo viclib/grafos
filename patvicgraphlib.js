@@ -178,8 +178,8 @@ Graph.prototype.walk = function(visit){
         for (var i = 1; i <= this.size; ++i)
             this.distance[i-1] = Infinity;
         this.distance[n-1] = 0;
-        this.parent[n-1]    = 0;
-        var count           = 1;
+        this.parent[n-1]   = 0;
+        var count          = 1;
         while (count < this.size){
             for (var node=0, i=1; i<=this.size; ++i)
                 if (!this.marked[i-1] && (!node || this.distance[i-1] < this.distance[node-1]))
@@ -228,6 +228,17 @@ Graph.prototype.output = function(){
     console.log("# d_medio = "+edgeCount / this.size);
     for (var i=0,l=dist.length; i<l; ++i)
         console.log(i,((dist[i]||0)/this.size));
+};
+Graph.prototype.output2 = function(){
+    console.log(this.size);
+    var sum = 0;
+    for (var i=1; i<=this.size; ++i){
+        var parent = this.parent[i-1];
+        var dist = this.distance[i-1];
+        sum += dist;
+        console.log(i + " " + parent + " " + dist);
+    };
+    console.log("Total weigth: " + sum);
 };
 Graph.prototype.connected = function(){
     this.clearState();
