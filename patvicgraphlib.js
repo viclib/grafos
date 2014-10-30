@@ -165,7 +165,6 @@ Graph.prototype.smallestPath = function(node){
     // Returns smallest path from `node` to the node you called dijkstra with.
     // Only works immediatly after disjkstra!
     return (function go(node,result){
-        console.log(node,result);
         return this.parent[node-1] === 0 
             ? result.concat(node)
             : go.call(this,this.parent[node-1],result.concat(node));
