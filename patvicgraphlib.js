@@ -239,11 +239,9 @@ Graph.prototype.walk = function(distance){
 };
 Graph.prototype.dijkstra = Graph.prototype.walk(function(node,neig,weig){
     return this.distance[node-1] + weig;
-
 });
 Graph.prototype.prim = Graph.prototype.walk(function(node,neig,weig){
     return weig;
-
 });
 Graph.prototype.safeCallDijkstra = function(n){
     if (!this.hasWeights) 
