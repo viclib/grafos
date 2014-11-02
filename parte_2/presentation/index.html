@@ -92,14 +92,18 @@ function renderMatrix(canvas,matrix,pos,size){
         sh = h / mh;
     for (var j=0; j<mh; ++j){
         for (var i=0; i<mw; ++i){
+            var dist = graph.distance[posToId([i,j])-1];
+            /*if (dist === Infinity) dist = graph.distance[posToId([i-1,j])-1];*/
+            /*if (dist === Infinity) dist = graph.distance[posToId([i,j-1])-1];*/
+            /*if (dist === Infinity) dist = graph.distance[posToId([i+1,j])-1];*/
+            /*if (dist === Infinity) dist = graph.distance[posToId([i,j+1])-1];*/
+            var gray = 255-dist*4;
+            if (gray > 255) gray = 255;
+            if (gray < 0) gray = 0;
             if (map[j][i])
-                var col = "green";
-            else{
-                var gray = 255-graph.distance[posToId([i,j])-1]*4;
-                if (gray > 255) gray = 255;
-                if (gray < 0) gray = 0;
+                var col = "rgb(0,160,0)";
+            else
                 var col = "rgb("+gray+","+gray+","+gray+")";
-            };
             /*console.log(i,j,posToId([i,j]),graph.distance[posToId([i,j])-1]);*/
             canvas.ctx.beginPath();
             canvas.ctx.fillStyle   = col;
@@ -125,9 +129,12 @@ document.body.appendChild(canvas);
 
 graph.dijkstra(posToId([1,1]));
 renderMatrix(canvas,matrix,matrixPos,matrixSize);
+var lastPos;
 document.body.onmousemove = function(e){
     var pos = [Math.floor(e.pageX / matrixSize[0] * matrix.w), Math.floor(e.pageY / matrixSize[1] * matrix.h)];
     /*console.log(pos,posToId(pos));*/
+    if (graph.neighbors(posToId(pos)).length === 0) pos = lastPos;
+    lastPos = pos;
     graph.dijkstra(posToId(pos));
     renderMatrix(canvas,matrix,matrixPos,matrixSize);
 };
