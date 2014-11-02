@@ -23,10 +23,12 @@ SymmetricBitMatrix.prototype.set = function(x,y){
 };
 
 // An usual 2D matrix of doubles.
-function Matrix(w,h){
+function Matrix(w,h,init){
     this.w      = w;
-    this.h      = w;
+    this.h      = h;
     this.buffer = new Float64Array(w*h);
+    console.log("->",w,h,this.buffer.length);
+    if (init) for (var i=0; i<w*h; ++i) this.buffer[i] = init;
 };
 Matrix.prototype.get = function(x,y){
     return this.buffer[x+y*this.w];
@@ -334,7 +336,7 @@ ArrayGraph.prototype.weights = function(n){
 function MatrixGraph(n,useBitMatrix){
     Graph.call(this,n);
     this.size      = n;
-    this.matrix    = useBitMatrix ? new SymmetricBitMatrix(n) : new Matrix(n);
+    this.matrix    = useBitMatrix ? new SymmetricBitMatrix(n) : new Matrix(n,n,Infinity);
     this.className = "MatrixGraph";
 };
 MatrixGraph.prototype = new Graph(0);

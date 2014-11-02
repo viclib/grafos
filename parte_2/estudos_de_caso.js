@@ -9,7 +9,7 @@ var usedMem = (function(){
 })();
 
 var usedClass     = lib.ArrayGraph;
-var graphName     = process.argv[2] || "rede_colaboracao";
+var graphName     = process.argv[2] || "grafo_1";
 var graphPath     = "./../graphs/"+graphName+".txt";
 
 lib.fromFile(graphPath,usedClass,function(graph){
