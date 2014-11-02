@@ -2,7 +2,7 @@ Comando para gerar este arquivo: node estudos_de_caso.js grafo_2 > grafo_2.txt
 Grafo: grafo_2
 Classe: ArrayGraph
 Tamanho do grafo: 1000 nodes
-Uso de memória: 63.2890625 MBs
+Uso de memória: 63.41796875 MBs
 
 
 Menor caminho de 1 a 10 (distância 2): 10 -> 52 -> 1
@@ -1018,4 +1018,4 @@ Peso total: 999
 
 
 Distância média: 2.085903903903904
-Tempo usado para calcular: 9.897s
+Tempo usado para calcular: 9.89s

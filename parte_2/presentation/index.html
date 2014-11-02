@@ -3,7 +3,7 @@
 <style>
 * { margin: 0px; border: 0px; }
 </style>
-<script src="../patvicgraphlib.js"></script>
+<script src="../../patvicgraphlib.js"></script>
 </head>
 <body>
 <script>
@@ -95,7 +95,7 @@ function renderMatrix(canvas,matrix,pos,size){
             if (map[j][i])
                 var col = "green";
             else{
-                var gray = graph.distance[posToId([i,j])-1]*4;
+                var gray = 255-graph.distance[posToId([i,j])-1]*4;
                 if (gray > 255) gray = 255;
                 if (gray < 0) gray = 0;
                 var col = "rgb("+gray+","+gray+","+gray+")";
