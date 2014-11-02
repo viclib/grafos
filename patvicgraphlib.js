@@ -95,7 +95,7 @@ function Graph(n){
     this.connecteds         = [];
     this.hasWeights         = false;
     this.hasNegativeWeights = false;
-    this.pqueue             = new PriorityQueue(10000,1000);
+    this.pqueue             = new PriorityQueue();
     for (var i=1; i<=n; ++i)
         this.marked[i-1] = 0;
 };
