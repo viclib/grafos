@@ -1,4 +1,4 @@
-Comando para gerar este arquivo: node estudos_de_caso2.js grafo_3 > output.txt
+Comando para gerar este arquivo: node estudos_de_caso.js grafo_3 > grafo_3.txt
 Grafo: grafo_3
 Classe: ArrayGraph
 Tamanho do grafo: 10000 nodes

@@ -46,63 +46,37 @@ Matrix.prototype.show = function(){
 
 // This is the priority queue used.
 // It is based on the fact keys are always small integers.
-//function PriorityQueue(){
-    //this.maxDist = 0;
-    //this.min     = Infinity;
-    //this.size    = 0;
-    //this.keys    = [[]];
-    //this.vals    = [[]];
-//};
-//PriorityQueue.prototype.grow = function(newMaxDist){
-    //for (var i=this.maxDist+1; i<=newMaxDist; ++i){
-        //this.keys[i] = [];
-        //this.vals[i] = [];
-    //};
-    //this.maxDist = newMaxDist;
-//};
-//PriorityQueue.prototype.add = function(key,val){
-    //if (key > this.maxDist) 
-        //this.grow(key);
-    //this.keys[key].push(key);
-    //this.vals[key].push(val);
-    //if (key < this.min) 
-        //this.min = key; 
-    //++this.size;
-//};
-//PriorityQueue.prototype.get = function(){
-    //if (this.size === 0) return 0;
-    //var minKey = this.keys[this.min].pop();
-    //var minVal = this.vals[this.min].pop();
-    //while (this.min < this.keys.length && this.keys[this.min].length === 0)
-        //++this.min;
-    //if (this.min === this.keys.length)
-        //this.min = Infinity;
-    //--this.size;
-    //return minVal;
-//};
-
-function PriorityQueue(w,h){
-    this.w       = w;
-    this.h       = h;
-    this.maxDist = w*h;
+function PriorityQueue(){
+    this.maxDist = 0;
     this.min     = Infinity;
     this.size    = 0;
-    this.keys    = new Uint32Array(this.w * this.h);
+    this.keys    = [[]];
+    this.vals    = [[]];
+};
+PriorityQueue.prototype.grow = function(newMaxDist){
+    for (var i=this.maxDist+1; i<=newMaxDist; ++i){
+        this.keys[i] = [];
+        this.vals[i] = [];
+    };
+    this.maxDist = newMaxDist;
 };
 PriorityQueue.prototype.add = function(key,val){
-    var len = this.keys[key*this.w]++;
-    this.keys[key*this.w+1+len*2+0] = key;
-    this.keys[key*this.w+1+len*2+1] = val;
-    if (key < this.min) this.min = key; 
+    if (key > this.maxDist) 
+        this.grow(key);
+    this.keys[key].push(key);
+    this.vals[key].push(val);
+    if (key < this.min) 
+        this.min = key; 
     ++this.size;
 };
 PriorityQueue.prototype.get = function(){
     if (this.size === 0) return 0;
-    var len = --this.keys[this.min*this.w];
-    var minKey = this.keys[this.min*this.w+len*2+1];
-    var minVal = this.keys[this.min*this.w+len*2+2];
-    while (this.min<this.maxDist && this.keys[this.min*this.w] === 0)
+    var minKey = this.keys[this.min].pop();
+    var minVal = this.vals[this.min].pop();
+    while (this.min < this.keys.length && this.keys[this.min].length === 0)
         ++this.min;
+    if (this.min === this.keys.length)
+        this.min = Infinity;
     --this.size;
     return minVal;
 };
