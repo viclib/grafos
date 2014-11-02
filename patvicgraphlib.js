@@ -339,16 +339,16 @@ ArrayGraph.prototype.weights = function(n){
 };
 
 // MatrixGraph is an implementation of Graph using an adjacency matrix.
-function MatrixGraph(n){
+function MatrixGraph(n,useBitMatrix){
     Graph.call(this,n);
     this.size      = n;
-    this.matrix    = new SymmetricBitMatrix(n);
+    this.matrix    = useBitMatrix ? new SymmetricBitMatrix(n) : new Matrix(n);
     this.className = "MatrixGraph";
 };
 MatrixGraph.prototype = new Graph(0);
-MatrixGraph.prototype.addEdge = function(x,y){
-    this.matrix.set(x-1,y-1);
-    this.matrix.set(y-1,x-1);
+MatrixGraph.prototype.addEdge = function(x,y,z){
+    this.matrix.set(x-1,y-1,z);
+    this.matrix.set(y-1,x-1,z);
 };
 MatrixGraph.prototype.neighbors = function(n){
     var neighbors = [];
@@ -356,6 +356,13 @@ MatrixGraph.prototype.neighbors = function(n){
         if (this.matrix.get(n-1,i-1))
             neighbors.push(i);
     return neighbors;
+};
+MatrixGraph.prototype.weights = function(n){
+    var weights = [];
+    for (var w, i=1, l=this.size; i<=l; ++i)
+        if (w = this.matrix.get(n-1,i-1))
+            weights.push(w);
+    return weights;
 };
 
 // This is a simple helper to populate a graph from a file using streams.
