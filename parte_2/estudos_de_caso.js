@@ -38,7 +38,34 @@ lib.fromFile(graphPath,usedClass,function(graph){
                 graph.weights_[j][i] = ~~(w*100000);
             };
         };
-        //graph.
+        var t = Date.now();
+        //graph.dijkstra(2722);
+        //console.log("Distance from Dijkstra to: ");
+        //console.log("J. B. Kruskal: "+graph.distance[471365-1]/100000);
+        //console.log("Jon M. Kleinberg: "+graph.distance[5709-1]/100000);
+        //console.log("Daniel R. Figueiredo: "+graph.distance[343930-1]/100000);
+        //console.log("Éva Tardos: "+graph.distance[11386-1]/100000);
+        //console.log("Ricardo Marroquim: "+graph.distance[309497-1]/100000);
+        //console.log("---");
+        graph.prim(2722);
+        console.log("Prim executado.");
+        var dijkstraNeigs = [graph.parent[2722-1]];
+        var danielNeigs = [graph.parent[343930-1]];
+        var ricardoNeigs = [graph.parent[309497-1]];
+        var nw = [];
+        for (var i=1; i<graph.size; ++i){
+            if (graph.parent[i-1] === 2722) dijkstraNeigs.push(i);
+            if (graph.parent[i-1] === 343930) dijkstraNeigs.push(i);
+            if (graph.parent[i-1] === 309497) dijkstraNeigs.push(i);
+            function order(i,j){ if (nw[i][1] > nw[j][1]){ var tmp=nw[i]; nw[i]=nw[j]; nw[j]=tmp; }; };
+            var dist = graph.distance[i-1];
+            if (nw.length < 3 || dist > nw[0][1]) nw.push([i,dist]);
+            if (nw.length >= 3) order(0,1), order(1,2), order(0,1);
+        };
+        console.log("Vizinhos de Dijkstra na MST:",dijkstraNeigs);
+        console.log("Vizinhos de Daniel na MST:",danielNeigs);
+        console.log("Vizinhos de Ricardo na MST:",ricardoNeigs);
+        console.log("3 vértices de maior grau: ",nw.slice(0,3).map(function(a){return a[0]+"(grau "+a[1]+")"}));
     } else {
         graph.dijkstra(1);
         for (var i=10; i<=50; i+=10)
