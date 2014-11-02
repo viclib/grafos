@@ -209,7 +209,7 @@ Graph.prototype.smallestPath = function(node){
     }).call(this,node,[]);
 };
 Graph.prototype.walk = function(distance){
-    // Walks through a graph, visiting the nodes, ordered by an distance.
+    // Walks through a graph, visiting the nodes, ordered by distance.
     return function(n){
         this.clearState();
         for (var i = 1; i <= this.size; ++i)
@@ -239,17 +239,11 @@ Graph.prototype.walk = function(distance){
 };
 Graph.prototype.dijkstra = Graph.prototype.walk(function(node,neig,weig){
     return this.distance[node-1] + weig;
-    //if (this.distance[neig-1] > this.distance[node-1] + weig){
-        //this.distance[neig-1] = this.distance[node-1] + weig;
-        //this.parent[neig-1]   = node;
-    //};
+
 });
 Graph.prototype.prim = Graph.prototype.walk(function(node,neig,weig){
     return weig;
-    //if (this.distance[neig-1] > weig){
-        //this.distance[neig-1] = weig;
-        //this.parent[neig-1]   = node;
-    //};
+
 });
 Graph.prototype.safeCallDijkstra = function(n){
     if (!this.hasWeights) 
