@@ -44,6 +44,69 @@ Matrix.prototype.show = function(){
     return str;
 };
 
+// This is the priority queue used.
+// It is based on the fact keys are always small integers.
+//function PriorityQueue(){
+    //this.maxDist = 0;
+    //this.min     = Infinity;
+    //this.size    = 0;
+    //this.keys    = [[]];
+    //this.vals    = [[]];
+//};
+//PriorityQueue.prototype.grow = function(newMaxDist){
+    //for (var i=this.maxDist+1; i<=newMaxDist; ++i){
+        //this.keys[i] = [];
+        //this.vals[i] = [];
+    //};
+    //this.maxDist = newMaxDist;
+//};
+//PriorityQueue.prototype.add = function(key,val){
+    //if (key > this.maxDist) 
+        //this.grow(key);
+    //this.keys[key].push(key);
+    //this.vals[key].push(val);
+    //if (key < this.min) 
+        //this.min = key; 
+    //++this.size;
+//};
+//PriorityQueue.prototype.get = function(){
+    //if (this.size === 0) return 0;
+    //var minKey = this.keys[this.min].pop();
+    //var minVal = this.vals[this.min].pop();
+    //while (this.min < this.keys.length && this.keys[this.min].length === 0)
+        //++this.min;
+    //if (this.min === this.keys.length)
+        //this.min = Infinity;
+    //--this.size;
+    //return minVal;
+//};
+
+function PriorityQueue(w,h){
+    this.w       = w;
+    this.h       = h;
+    this.maxDist = w*h;
+    this.min     = Infinity;
+    this.size    = 0;
+    this.keys    = new Uint32Array(this.w * this.h);
+};
+PriorityQueue.prototype.add = function(key,val){
+    var len = this.keys[key*this.w]++;
+    this.keys[key*this.w+1+len*2+0] = key;
+    this.keys[key*this.w+1+len*2+1] = val;
+    if (key < this.min) this.min = key; 
+    ++this.size;
+};
+PriorityQueue.prototype.get = function(){
+    if (this.size === 0) return 0;
+    var len = --this.keys[this.min*this.w];
+    var minKey = this.keys[this.min*this.w+len*2+1];
+    var minVal = this.keys[this.min*this.w+len*2+2];
+    while (this.min<this.maxDist && this.keys[this.min*this.w] === 0)
+        ++this.min;
+    --this.size;
+    return minVal;
+};
+
 // This is the main Graph class. It implements the common interface of a graph,
 // including most of the functions used in the library, such as BFS and DFS. 
 function Graph(n){
@@ -53,11 +116,12 @@ function Graph(n){
     this.stack              = new Uint32Array(1500000); // porque sim @.@ me processa
     this.prevUnmarked       = new Uint32Array(n);
     this.nextUnmarked       = new Uint32Array(n);
-    this.distance          = new Float64Array(n);
+    this.distance           = new Float64Array(n);
     this.firstUnmarked      = 1;
     this.connecteds         = [];
     this.hasWeights         = false;
     this.hasNegativeWeights = false;
+    this.pqueue             = new PriorityQueue(10000,1000);
     for (var i=1; i<=n; ++i)
         this.marked[i-1] = 0;
 };
@@ -170,7 +234,7 @@ Graph.prototype.smallestPath = function(node){
             : go.call(this,this.parent[node-1],result.concat(node));
     }).call(this,node,[]);
 };
-Graph.prototype.walk = function(visit){
+Graph.prototype.walk = function(distance){
     // Walks through a graph, visiting the nodes, ordered by an distance.
     return function(n){
         this.clearState();
@@ -178,32 +242,42 @@ Graph.prototype.walk = function(visit){
             this.distance[i-1] = Infinity;
         this.distance[n-1] = 0;
         this.parent[n-1]   = 0;
-        var count          = 1;
-        while (count < this.size){
-            for (var node=0, i=1; i<=this.size; ++i)
-                if (!this.marked[i-1] && (!node || this.distance[i-1] < this.distance[node-1]))
-                    node = i;
+        this.pqueue.add(0,n);
+        while (node = this.pqueue.get()){
+            if (this.marked[node-1])
+                continue;
             this.marked[node-1] = 1;
-            ++count;
-            var neighbors = this.neighbors(node);
-            var weigths = this.weights(node);
-            for (var i=0, l=neighbors.length; i<l; ++i)
-                if (!this.marked[neighbors[i]-1])
-                    visit.call(this,node,neighbors[i],weigths[i]);
+            var neighbors       = this.neighbors(node);
+            var weights         = this.weights(node);
+            //console.log(node,neighbors,this.size);
+            for (var i=0, l=neighbors.length; i<l; ++i){
+                var neig = neighbors[i];
+                var weig = weights[i];
+                if (!this.marked[neighbors[i]-1]){
+                    var dist = distance.call(this,node,neig,weig);
+                    if (this.distance[neig-1] > dist){
+                        this.distance[neig-1] = dist;
+                        this.parent[neig-1]   = node;
+                        this.pqueue.add(dist,neig);
+                    };
+                };
+            };
         };
     };
 };
 Graph.prototype.dijkstra = Graph.prototype.walk(function(node,neig,weig){
-    if (this.distance[neig-1] > this.distance[node-1] + weig){
-        this.distance[neig-1] = this.distance[node-1] + weig;
-        this.parent[neig-1]   = node;
-    };
+    return this.distance[node-1] + weig;
+    //if (this.distance[neig-1] > this.distance[node-1] + weig){
+        //this.distance[neig-1] = this.distance[node-1] + weig;
+        //this.parent[neig-1]   = node;
+    //};
 });
 Graph.prototype.prim = Graph.prototype.walk(function(node,neig,weig){
-    if (this.distance[neig-1] > weig){
-        this.distance[neig-1] = weig;
-        this.parent[neig-1]   = node;
-    };
+    return weig;
+    //if (this.distance[neig-1] > weig){
+        //this.distance[neig-1] = weig;
+        //this.parent[neig-1]   = node;
+    //};
 });
 Graph.prototype.safeCallDijkstra = function(n){
     if (!this.hasWeights) 
@@ -230,14 +304,14 @@ Graph.prototype.output = function(){
 };
 Graph.prototype.output2 = function(){
     console.log(this.size);
-    var sum = 0;
+    var totalWeight = 0;
     for (var i=1; i<=this.size; ++i){
-        var parent = this.parent[i-1];
-        var dist = this.distance[i-1];
-        sum += dist;
-        console.log(i + " " + parent + " " + dist);
+        if (this.distance[i-1]!==Infinity){
+            console.log(i + " " + this.parent[i-1] + " " + this.distance[i-1]);
+            totalWeight += this.distance[i-1];
+        };
     };
-    console.log("Total weigth: " + sum);
+    console.log("Peso total: " + totalWeight);
 };
 Graph.prototype.connected = function(){
     this.clearState();
@@ -246,12 +320,25 @@ Graph.prototype.connected = function(){
     this.connecteds.sort(function(a,b){ return b.length - a.length; });
     return this.connecteds;
 };
+Graph.prototype.averageDistance = function(){
+    var init = Date.now();
+    var dist = 0;
+    for (var i=1; i<=this.size; ++i){
+        this.dijkstra(i);
+        //console.log(i+"/"+this.size
+            //+", used time: "+Math.floor(((Date.now()-init))*0.001)+"s"
+            //+", estimated time: "+(Math.floor((Date.now()-init)/i*(this.size-i)*0.001))+"s");
+        for (var j=i+1; j<=this.size; ++j)
+            dist += this.distance[j-1] || 0;
+    };
+    return dist/((this.size * (this.size - 1)) / 2);
+};
 
 // ArrayGraph is an implementation of Graph using an adjacency dynamic array.
 function ArrayGraph(n,params){
     Graph.call(this,n);
-    params      = params || {};
-    this.size   = n;
+    params          = params || {};
+    this.size       = n;
     this.neighbors_ = params.neighbors_ || new Array(n);
     this.weights_   = params.weights_ || new Array(n);
     if (!params.neighbors_)
