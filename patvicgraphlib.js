@@ -218,12 +218,10 @@ Graph.prototype.walk = function(distance){
         this.parent[n-1]   = 0;
         this.pqueue.add(0,n);
         while (node = this.pqueue.get()){
-            if (this.marked[node-1])
-                continue;
+            if (this.marked[node-1]) continue;
             this.marked[node-1] = 1;
             var neighbors       = this.neighbors(node);
             var weights         = this.weights(node);
-            //console.log(node,neighbors,this.size);
             for (var i=0, l=neighbors.length; i<l; ++i){
                 var neig = neighbors[i];
                 var weig = weights[i];

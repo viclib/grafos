@@ -10,7 +10,7 @@ var usedMem = (function(){
 
 var usableClasses = [lib.ArrayGraph, lib.MatrixGraph];
 var usedClass     = lib.ArrayGraph;
-var graphName     = process.argv[2] || "grafo_4";
+var graphName     = process.argv[2] || "grafo_1";
 var graphPath     = "./../graphs/"+graphName+".txt";
 
 lib.fromFile(graphPath,usedClass,function(graph){
@@ -21,20 +21,20 @@ lib.fromFile(graphPath,usedClass,function(graph){
     console.log("Uso de memória: "+(usedMem()/(1024*1024))+" MBs");
     console.log("\n");
 
-    if (graphName === "rede_colaboracao"){
-        var min = Infinity;
-        var max = -Infinity;
-        for (var j=0; j<graph.weights_.length; ++j){
-            for (var i=0; i<graph.weights_[j].length; ++i){
-                var w = graph.weights_[j][i];
-                var min = Math.min(min,w);
-                var max = Math.max(max,w);
-                graph.weights_[j][i] = ~~(w*1000);
-            };
-        };
-    };
-    console.log(min,max);
-    process.exit();
+    //if (graphName === "rede_colaboracao"){
+        //var min = Infinity;
+        //var max = -Infinity;
+        //for (var j=0; j<graph.weights_.length; ++j){
+            //for (var i=0; i<graph.weights_[j].length; ++i){
+                //var w = graph.weights_[j][i];
+                //var min = Math.min(min,w);
+                //var max = Math.max(max,w);
+                //graph.weights_[j][i] = ~~(w*1000);
+            //};
+        //};
+    //};
+    //console.log(min,max);
+    //process.exit();
 
     graph.dijkstra(1);
     for (var i=10; i<=50; i+=10)
