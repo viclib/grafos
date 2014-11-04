@@ -67,16 +67,6 @@ PriorityQueue.prototype.add = function(key,val){
         this.min = key; 
     ++this.size;
 };
-PriorityQueue.prototype.get = function(){
-    if (this.size === 0) return 0;
-    var minVal = this.vals[this.min].pop();
-    while (this.min < this.vals.length && this.vals[this.min].length === 0)
-        ++this.min;
-    if (this.min === this.vals.length)
-        this.min = Infinity;
-    --this.size;
-    return minVal;
-};
 
 // This is the main Graph class. It implements the common interface of a graph,
 // including most of the functions used in the library, such as BFS and DFS. 
@@ -106,6 +96,7 @@ Graph.prototype.clearState = function(){
     this.connecteds    = [];
 };
 Graph.prototype.bfs = function(n,dontClear){
+    // Breadth-first search.
     if (!dontClear) this.clearState();
     var self         = this;
     var stack        = [n];
@@ -129,6 +120,7 @@ Graph.prototype.bfs = function(n,dontClear){
     };
 };
 Graph.prototype.dfs = function(n){
+    // Depth-first search.
     this.clearState();
     var stack        = [n];
     this.parent[n-1] = 0;
