@@ -46,26 +46,22 @@ Matrix.prototype.show = function(){
     return str;
 };
 
-// This is the priority queue used.
+// This is an optimized priority queue using dynamic arrays.
 // It is based on the fact keys are always small integers.
 function PriorityQueue(){
     this.maxDist = 0;
     this.min     = Infinity;
     this.size    = 0;
-    this.keys    = [[]];
     this.vals    = [[]];
 };
 PriorityQueue.prototype.grow = function(newMaxDist){
-    for (var i=this.maxDist+1; i<=newMaxDist; ++i){
-        this.keys[i] = [];
+    for (var i=this.maxDist+1; i<=newMaxDist; ++i)
         this.vals[i] = [];
-    };
     this.maxDist = newMaxDist;
 };
 PriorityQueue.prototype.add = function(key,val){
     if (key > this.maxDist) 
         this.grow(key);
-    this.keys[key].push(key);
     this.vals[key].push(val);
     if (key < this.min) 
         this.min = key; 
@@ -73,11 +69,10 @@ PriorityQueue.prototype.add = function(key,val){
 };
 PriorityQueue.prototype.get = function(){
     if (this.size === 0) return 0;
-    var minKey = this.keys[this.min].pop();
     var minVal = this.vals[this.min].pop();
-    while (this.min < this.keys.length && this.keys[this.min].length === 0)
+    while (this.min < this.vals.length && this.vals[this.min].length === 0)
         ++this.min;
-    if (this.min === this.keys.length)
+    if (this.min === this.vals.length)
         this.min = Infinity;
     --this.size;
     return minVal;
