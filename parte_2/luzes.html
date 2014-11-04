@@ -70,10 +70,10 @@ var map = [                 // Mapa. 0/1 = sem/com parede. Você pode adicinar/r
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 ];
 
-var w       = map[0].length; // tamanho horizontal do tabuleiro
-var h       = map.length; // tamanho vertical do tabuleiro
-var graph   = new ArrayGraph(w*h); // grafo com o número de vértices = o número de tiles no grid
-var matrix  = new Matrix(w,h); // matriz onde serão renderizadas as cores
+var w       = map[0].length;       // Tamanho horizontal do tabuleiro.
+var h       = map.length;          // Tamanho vertical do tabuleiro.
+var graph   = new ArrayGraph(w*h); // Grafo com o número de vértices = o número de tiles no grid.
+var matrix  = new Matrix(w,h);     // Matriz onde serão renderizadas as cores.
 
 // Configura o grafo, setando o vizinho de cada vértice como seu vizinho no grid.
 for (var y=0; y<h; ++y){
