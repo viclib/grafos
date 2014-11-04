@@ -1,16 +1,23 @@
 <html>
 <head>
-<style>
-* { margin: 0px; border: 0px; width:100%; height:100%; }
-</style>
-<script src="../../patvicgraphlib.js"></script>
+<style>* { margin: 0px; border: 0px; width:100%; height:100%; }</style>
+<script>
+// Olá! Essa macumba abaixo é parte comprimida de patvicgraphlib.js, uma
+// biblioteca de grafos de Victor Maia e Patrícia Kovaleski, disponível em
+// github.com/viclib/grafos. Pule essa parte para ver o código do web app.
+Matrix=function(a,c,b){this.e=a;this.j=c;this.buffer=new Float64Array(a*c);this.w=this.e;this.h=this.j;if(b)for(var d=0;d<a*c;++d)this.buffer[d]=b};Matrix.prototype.get=function(a,c){return this.buffer[a+c*this.e]};Matrix.prototype.set=function(a,c,b){return this.buffer[a+c*this.e]=b};PriorityQueue=function(){this.f=0;this.min=Infinity;this.size=0;this.keys=[[]];this.i=[[]]};PriorityQueue.prototype.add=function(a,c){if(a>this.f){for(var b=this.f+1;b<=a;++b)this.keys[b]=[],this.i[b]=[];this.f=a}this.keys[a].push(a);this.i[a].push(c);a<this.min&&(this.min=a);++this.size};PriorityQueue.prototype.get=function(){if(0===this.size)return 0;this.keys[this.min].pop();for(var a=this.i[this.min].pop();this.min<this.keys.length&&0===this.keys[this.min].length;)++this.min;this.min===this.keys.length&&(this.min=Infinity);--this.size;return a};Graph=function(a){this.parent=new Uint32Array(a);new Uint8Array(a);this.b=new Uint8Array(a);this.stack=new Uint32Array(15E5);this.o=new Uint32Array(a);this.n=new Uint32Array(a);this.a=new Float64Array(a);this.g=new PriorityQueue;this.distance=this.a;for(var c=1;c<=a;++c)this.b[c-1]=0};Graph.prototype.m=function(a){return function(c){for(var b=0,d=this.b.length;b<d;++b)this.b[b]=0,this.o[b]=b,this.n[b]=b+2;for(b=1;b<=this.size;++b)this.a[b-1]=Infinity;this.a[c-1]=0;this.parent[c-1]=0;for(this.g.add(0,c);node=this.g.get();)if(!this.b[node-1]){this.b[node-1]=1;c=this.k(node);for(var d=this.d[node-1],b=0,g=c.length;b<g;++b){var e=c[b],f=d[b];this.b[c[b]-1]||(f=a.call(this,node,e,f),this.a[e-1]>f&&(this.a[e-1]=f,this.parent[e-1]=node,this.g.add(f,e)))}}}}(function(a,c,b){return this.a[a-1]+b});ArrayGraph=function(a,c){Graph.call(this,a);c=c||{};this.size=a;this.c=c.c||Array(a);this.d=c.d||Array(a);if(!c.c)for(var b=0;b<a;++b)this.c[b]=[],this.d[b]=[];this.className="ArrayGraph"};ArrayGraph.prototype=new Graph(0);ArrayGraph.prototype.l=function(a,c,b){this.c[a-1].push(c);this.c[c-1].push(a);void 0!==b&&(this.d[a-1].push(b),this.d[c-1].push(b))};ArrayGraph.prototype.k=function(a){return this.c[a-1]};ArrayGraph.prototype.addEdge=ArrayGraph.prototype.l;ArrayGraph.prototype.neighbors=ArrayGraph.prototype.k;Matrix.prototype.set=Matrix.prototype.set;Matrix.prototype.get=Matrix.prototype.get;Matrix.prototype.w=Matrix.prototype.e;Matrix.prototype.h=function(){return this.j};Graph.prototype.dijkstra=Graph.prototype.m;
+</script>
 </head>
 <body>
 <script>
-
-var posToId = function(pos){ return Math.min(w*h,pos[0]+pos[1]*w+1); };
-var idToPos = function(idx){ return [(idx-1)%w, Math.floor((idx-1)/w)]; };
-var map = [
+// Este é o código do web app. Os parâmetros principais estão logo abaixo,
+// sinta-se à vontade para mudá-los. O resto do código também não deve ser
+// difícil de adaptar, caso precise de algo específico.
+var matrixPos  = [0,0];     // Posição da matriz na tela, em pixels.
+var matrixSize = [600,600]; // Tamanho da matriz na tela, em pixels.
+var lightColor = [1,1,1];   // Cor da luz em RGB, de 0 a 1. [1,1,1] = branco.
+var wallColor  = [0,0.7,0]; // Cor da parede, de 0 a 1. [0,0.7,0] = verde.
+var map = [                 // Mapa. 0/1 = sem/com parede. Você pode adicinar/remover linhas e colunas.
     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -62,30 +69,40 @@ var map = [
     [1,0,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 ];
-var h = map.length;
-var w = map[0].length;
-var graph  = new ArrayGraph(w*h);
-var matrix = new Matrix(w,h);
+
+var w       = map[0].length; // tamanho horizontal do tabuleiro
+var h       = map.length; // tamanho vertical do tabuleiro
+var graph   = new ArrayGraph(w*h); // grafo com o número de vértices = o número de tiles no grid
+var matrix  = new Matrix(w,h); // matriz onde serão renderizadas as cores
+
+// Configura o grafo, setando o vizinho de cada vértice como seu vizinho no grid.
 for (var y=0; y<h; ++y){
     for (var x=0; x<w; ++x){
-        if (!map[y][x]){
-            if (x === 2 && y === 3)
-                console.log(x,y,map[y][x-1],map[y-1][x]);
-            if (x>0) if (!map[y][x-1]) graph.addEdge(posToId([x,y]),posToId([x-1,y]),1);
-            if (y>0) if (!map[y-1][x]) graph.addEdge(posToId([x,y]),posToId([x,y-1]),1);
-        };
+        if (!map[y][x] && x>0 && !map[y][x-1]) 
+            graph.addEdge(posToId([x,y]),posToId([x-1,y]),1);
+        if (!map[y][x] && y>0 && !map[y-1][x]) 
+            graph.addEdge(posToId([x,y]),posToId([x,y-1]),1);
     };
 };
-console.log(graph.neighbors_);
-console.log(graph.distance);
-/*console.log(graph.distance);*/
+
+// Essas funções convertem a posição do grid (ex: [2,2]) para id do vértice no grafo (ex: 103).
+function posToId(pos){ 
+    return Math.min(w*h,pos[0]+pos[1]*w+1); 
+};
+function idToPos(idx){ 
+    return [(idx-1)%w, Math.floor((idx-1)/w)]; 
+};
+
+// Toda vez que essa função é chamada, a matriz é renderizada na tela,
+// utilizando as distâncias de cada vértice no grafo (resultado de dijkstra)
+// como cor dos vértices.
 function renderMatrix(canvas,matrix,pos,size){
-    var x = pos[0],
-        y = pos[1],
-        w = size[0], 
-        h = size[1],
-        X = x + w,
-        Y = y + h,
+    var x  = pos[0],
+        y  = pos[1],
+        w  = size[0], 
+        h  = size[1],
+        X  = x + w,
+        Y  = y + h,
         mw = matrix.w,
         mh = matrix.h,
         sw = w / mw,
@@ -93,19 +110,12 @@ function renderMatrix(canvas,matrix,pos,size){
     for (var j=0; j<mh; ++j){
         for (var i=0; i<mw; ++i){
             var dist = graph.distance[posToId([i,j])-1];
-            /*if (dist === Infinity) dist = graph.distance[posToId([i-1,j])-1];*/
-            /*if (dist === Infinity) dist = graph.distance[posToId([i,j-1])-1];*/
-            /*if (dist === Infinity) dist = graph.distance[posToId([i+1,j])-1];*/
-            /*if (dist === Infinity) dist = graph.distance[posToId([i,j+1])-1];*/
-            var gray = 255-dist*4;
-            if (gray > 255) gray = 255;
-            if (gray < 0) gray = 0;
-            if (map[j][i])
-                var col = "rgb(0,160,0)";
-            else
-                var col = "rgb("+gray+","+gray+","+gray+")";
-            /*console.log(i,j,posToId([i,j]),graph.distance[posToId([i,j])-1]);*/
+            var gray = Math.min(Math.max(255-dist*4,0),255);
+            var lcol = "rgb("+(~~(gray*lightColor[0]))+","+(~~(gray*lightColor[1]))+","+(~~(gray*lightColor[2]))+")";
+            var wcol = "rgb("+(~~(wallColor[0]*255))+"," + (~~(wallColor[1]*255))+","+(~~(wallColor[2]*255))+")";
+            var col  = map[j][i] ? wcol : lcol;
             canvas.ctx.beginPath();
+            canvas.ctx.lineWidth   = 0.5;
             canvas.ctx.fillStyle   = col;
             canvas.ctx.strokeStyle = "black";
             canvas.ctx.rect(x+i*sw, y+j*sh, sw, sh);
@@ -116,37 +126,35 @@ function renderMatrix(canvas,matrix,pos,size){
     return canvas;
 };
 
-var canvas = document.createElement("canvas");
-canvas.ctx = canvas.getContext("2d");
+// Abaixo, apenas criamos o elemento HTML (canvas) fullscreen que será usado
+// para apresentar o resultado na tela, e configuramos um callback para
+// atualizá-lo conforme o mouse se movimenta. Se você quer exportar o app para
+// dentro de outro site, você deve editar aqui, encapsulando o elemento.
+var canvas          = document.createElement("canvas");
+canvas.ctx          = canvas.getContext("2d");
 canvas.width        = window.innerWidth;
 canvas.height       = window.innerHeight;
 canvas.style.border = "1px solid black";
-var matrixPos  = [0,0];
-var matrixSize = [800,800];
 document.body.appendChild(canvas);
-
-
-
-graph.dijkstra(posToId([1,1]));
-renderMatrix(canvas,matrix,matrixPos,matrixSize);
-var lastPos;
-document.body.onmousemove = function(e){
-    var pos = [Math.floor(e.pageX / matrixSize[0] * matrix.w), Math.floor(e.pageY / matrixSize[1] * matrix.h)];
-    /*console.log(pos,posToId(pos));*/
-    if (graph.neighbors(posToId(pos)).length === 0) pos = lastPos;
-    lastPos = pos;
-    graph.dijkstra(posToId(pos));
+function refresh(mousePos){
+    if (!(0 <= mousePos[0] && mousePos[0] < matrix.w) ||
+        !(0 <= mousePos[1] && mousePos[1] < matrix.h))
+        graph.dijkstra(0);
+    else
+        graph.dijkstra(posToId(mousePos));
     renderMatrix(canvas,matrix,matrixPos,matrixSize);
 };
-
-
-
-
-        
-
-
-
-console.log("test");
+var lastMousePos;
+document.body.onmousemove = function(e){
+    var mousePos = [
+        Math.floor(e.pageX / matrixSize[0] * matrix.w), 
+        Math.floor(e.pageY / matrixSize[1] * matrix.h)];
+    if (graph.neighbors(posToId(mousePos)).length === 0) 
+        mousePos = lastMousePos;
+    lastMousePos = mousePos;
+    refresh(mousePos);
+};
+refresh([1,1]);
 </script>
 </body>
 </html>
