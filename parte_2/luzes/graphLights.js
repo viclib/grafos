@@ -83,9 +83,7 @@ function graphLights(params){
 
     // Abaixo, apenas capturamos o elemento HTML (canvas) que será usado
     // para apresentar o resultado na tela, e configuramos um callback para
-    // atualizá-lo conforme o mouse se movimenta. Se você quer incluir o app
-    // dentro de outro site, basta você adicionar um div com o id="luzes",
-    // e incluir esse script dentro do seu site.
+    // atualizá-lo conforme o mouse se movimenta. 
     canvas.ctx          = canvas.getContext("2d");
     canvas.style.border = "1px solid black";
     document.body.appendChild(canvas);
