@@ -256,12 +256,15 @@ vl.require(["graphs/"+file+".json","graphs/"+file+".sol.json"],function(map,sol)
     
     // Solução:
     //distance: 492 742 501
-    path = sol;
+    //path = sol;
     //for (var paths=[],i=0,s=sol,l=sol.length; i<l; s=shift(s),++i) paths.push(s);
     //path = findBest(positions,paths);
 
     // Solução: guloso bola crescente
     //path = gulosoBolaCrescente(positions);
+    
+    // Solução: guloso nearest (melhor solução nossa)
+    path = gulosoNearest(positions);
     
     // Solução: guloso nearest (melhor solução nossa)
     //for (var i=0, paths=[]; i<500; ++i) {
