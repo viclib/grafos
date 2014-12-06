@@ -1,14 +1,17 @@
 var Draw = function(p){
     var p = p || {};
-    this.w = p.w || 600;
-    this.h = p.h || 400;
-    this.hw = this.w * 0.5;
-    this.hh = this.h * 0.5;
     this.canvas = document.createElement("canvas");
     if (p.parent) p.parent.appendChild(this.canvas);
+    this.resize(p.w || 600, p.h || 400);
+    this.ctx = this.canvas.getContext("2d");
+};
+Draw.prototype.resize = function(w,h){
+    this.w = w;
+    this.h = h;
+    this.hw = this.w * 0.5;
+    this.hh = this.h * 0.5;
     this.canvas.width = this.w;
     this.canvas.height = this.h;
-    this.ctx = this.canvas.getContext("2d");
 };
 Draw.prototype.rect = function(p){
     //this.ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -17,7 +20,7 @@ Draw.prototype.rect = function(p){
     this.draw(p);
 };
 Draw.prototype.clear = function(){
-    this.ctx.clearRect(0,0,this.w,this.h);
+    this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
 };
 Draw.prototype.line = function(p){
     this.ctx.beginPath();
